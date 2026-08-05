@@ -891,21 +891,18 @@ function MentorDashboard() {
           </p>
         </div>
 
-        <div className="flex flex-col items-end gap-1">
-          <Select value={periodo} onValueChange={(value) => setPeriodo(value as typeof periodo)}>
-            <SelectTrigger className="h-9 w-[180px] text-xs">
-              <SelectValue placeholder="Período" />
-            </SelectTrigger>
-            <SelectContent>
-              {MENTOR_PERIOD_OPTIONS.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <span className="text-[10px] text-muted-foreground">Afeta: Reuniões concluídas</span>
-        </div>
+        <Select value={periodo} onValueChange={(value) => setPeriodo(value as typeof periodo)}>
+          <SelectTrigger className="h-9 w-[180px] text-xs">
+            <SelectValue placeholder="Período" />
+          </SelectTrigger>
+          <SelectContent>
+            {MENTOR_PERIOD_OPTIONS.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -1788,21 +1785,18 @@ function MentoradoDashboard() {
           </p>
         </div>
 
-        <div className="flex flex-col items-end gap-1">
-          <Select value={periodo} onValueChange={(value) => setPeriodo(value as typeof periodo)}>
-            <SelectTrigger className="h-9 w-[180px] text-xs">
-              <SelectValue placeholder="Período" />
-            </SelectTrigger>
-            <SelectContent>
-              {MENTORADO_PERIOD_OPTIONS.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <span className="text-[10px] text-muted-foreground">Afeta: Sua nota como mentorado</span>
-        </div>
+        <Select value={periodo} onValueChange={(value) => setPeriodo(value as typeof periodo)}>
+          <SelectTrigger className="h-9 w-[180px] text-xs">
+            <SelectValue placeholder="Período" />
+          </SelectTrigger>
+          <SelectContent>
+            {MENTORADO_PERIOD_OPTIONS.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
