@@ -891,18 +891,21 @@ function MentorDashboard() {
           </p>
         </div>
 
-        <Select value={periodo} onValueChange={(value) => setPeriodo(value as typeof periodo)}>
-          <SelectTrigger className="h-9 w-[180px] text-xs">
-            <SelectValue placeholder="Período" />
-          </SelectTrigger>
-          <SelectContent>
-            {MENTOR_PERIOD_OPTIONS.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex flex-col items-end gap-1">
+          <Select value={periodo} onValueChange={(value) => setPeriodo(value as typeof periodo)}>
+            <SelectTrigger className="h-9 w-[180px] text-xs">
+              <SelectValue placeholder="Período" />
+            </SelectTrigger>
+            <SelectContent>
+              {MENTOR_PERIOD_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <span className="text-[10px] text-muted-foreground">Afeta: Reuniões concluídas</span>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -929,7 +932,7 @@ function MentorDashboard() {
         <KpiCard
           label="Aderência (como mentor)"
           value="—"
-          subtext="30d · —% em 12m"
+          subtext="Sem dados suficientes ainda"
           icon={<TrendingUp />}
         />
       </div>
@@ -977,12 +980,22 @@ function MentorDashboard() {
   )
 }
 
-function FilterPills({ options, active }: { options: string[]; active: string }) {
+function FilterPills({
+  options,
+  active,
+  onSelect,
+}: {
+  options: string[]
+  active: string
+  onSelect: (option: string) => void
+}) {
   return (
     <div className="flex items-center gap-1">
       {options.map((option) => (
-        <span
+        <button
           key={option}
+          type="button"
+          onClick={() => onSelect(option)}
           className={cn(
             "rounded-full px-2.5 py-1 text-xs font-medium leading-none transition-colors",
             option === active
@@ -991,7 +1004,7 @@ function FilterPills({ options, active }: { options: string[]; active: string })
           )}
         >
           {option}
-        </span>
+        </button>
       ))}
     </div>
   )
@@ -1514,16 +1527,60 @@ function MeetingDetailView({ meeting, onBack }: { meeting: MeetingDetail; onBack
   )
 }
 
+const ADERENCIA_BY_ROLE: Record<"Todas" | "Como mentor" | "Como mentorado", { d30: number; d12m: number }> = {
+  Todas: { d30: 75, d12m: 75 },
+  "Como mentor": { d30: 80, d12m: 78 },
+  "Como mentorado": { d30: 70, d12m: 72 },
+}
+
+const HISTORICO_REUNIOES = [
+  {
+    date: "05/ago",
+    name: "Felipe Rodrigues",
+    role: "Mentor" as const,
+    score: "4.0",
+    dateLabel: "5 de ago. de 2026, 10:00",
+    menteeProject: "test2",
+    stage: "test2",
+  },
+  {
+    date: "04/ago",
+    name: "Felipe Rodrigues",
+    role: "Mentor" as const,
+    score: "3.0",
+    dateLabel: "4 de ago. de 2026, 10:00",
+    menteeProject: "test2",
+    stage: "test2",
+  },
+  {
+    date: "03/ago",
+    name: "Felipe Rodrigues",
+    role: "Mentor" as const,
+    score: "3.0",
+    dateLabel: "3 de ago. de 2026, 10:00",
+    menteeProject: "test2",
+    stage: "test2",
+  },
+]
+
 function ReunioesDashboard() {
   const [selectedMeeting, setSelectedMeeting] = useState<MeetingDetail | null>(() =>
     new URLSearchParams(window.location.search).get("modal") === "detalhe-reuniao"
       ? { dateLabel: "5 de ago. de 2026, 10:00", menteeName: "Felipe Rodrigues", menteeProject: "test2", stage: "test2" }
       : null,
   )
+  const [aderenciaFiltro, setAderenciaFiltro] = useState<"Todas" | "Como mentor" | "Como mentorado">("Todas")
+  const [agendadasFiltro, setAgendadasFiltro] = useState<"Todas" | "Mentor" | "Mentorado">("Todas")
+  const [historicoFiltro, setHistoricoFiltro] = useState<"Todas" | "Mentor" | "Mentorado">("Todas")
 
   if (selectedMeeting) {
     return <MeetingDetailView meeting={selectedMeeting} onBack={() => setSelectedMeeting(null)} />
   }
+
+  const aderencia = ADERENCIA_BY_ROLE[aderenciaFiltro]
+  const historicoFiltrado = HISTORICO_REUNIOES.filter(
+    (item) => historicoFiltro === "Todas" || item.role === historicoFiltro,
+  )
 
   return (
     <div className="space-y-6">
@@ -1545,19 +1602,25 @@ function ReunioesDashboard() {
                 <TrendingUp className="h-3.5 w-3.5 text-muted-foreground" />
                 <CardTitle className="text-sm font-semibold">Aderência</CardTitle>
               </div>
-              <FilterPills options={["Todas", "Como mentor", "Como mentorado"]} active="Todas" />
+              <FilterPills
+                options={["Todas", "Como mentor", "Como mentorado"]}
+                active={aderenciaFiltro}
+                onSelect={(option) => setAderenciaFiltro(option as typeof aderenciaFiltro)}
+              />
             </div>
           </CardHeader>
           <CardContent className="pb-5 px-5">
             <div className="flex items-end gap-6">
               <div className="flex flex-col items-start gap-0.5">
-                <span className="text-4xl font-bold tracking-tight tabular-nums">75%</span>
+                <span className="text-4xl font-bold tracking-tight tabular-nums">{aderencia.d30}%</span>
                 <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
                   30 dias
                 </span>
               </div>
               <div className="flex flex-col items-start gap-0.5 pb-1">
-                <span className="text-2xl font-bold tracking-tight tabular-nums text-muted-foreground">75%</span>
+                <span className="text-2xl font-bold tracking-tight tabular-nums text-muted-foreground">
+                  {aderencia.d12m}%
+                </span>
                 <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
                   12 meses
                 </span>
@@ -1620,7 +1683,11 @@ function ReunioesDashboard() {
                 0
               </Badge>
             </div>
-            <FilterPills options={["Todas", "Mentor", "Mentorado"]} active="Todas" />
+            <FilterPills
+              options={["Todas", "Mentor", "Mentorado"]}
+              active={agendadasFiltro}
+              onSelect={(option) => setAgendadasFiltro(option as typeof agendadasFiltro)}
+            />
           </div>
         </CardHeader>
         <CardContent className="py-12 px-5">
@@ -1634,55 +1701,38 @@ function ReunioesDashboard() {
             <div className="flex items-center gap-2">
               <CardTitle className="text-base font-semibold">Histórico recente</CardTitle>
               <Badge variant="secondary" className="text-xs font-medium rounded-full">
-                3 concluídas
+                {historicoFiltrado.length} concluídas
               </Badge>
             </div>
-            <FilterPills options={["Todas", "Mentor", "Mentorado"]} active="Todas" />
+            <FilterPills
+              options={["Todas", "Mentor", "Mentorado"]}
+              active={historicoFiltro}
+              onSelect={(option) => setHistoricoFiltro(option as typeof historicoFiltro)}
+            />
           </div>
         </CardHeader>
         <CardContent className="p-0 divide-y divide-border">
-          <HistoryRow
-            date="05/ago"
-            name="Felipe Rodrigues"
-            role="Mentor"
-            score="4.0"
-            onClick={() =>
-              setSelectedMeeting({
-                dateLabel: "5 de ago. de 2026, 10:00",
-                menteeName: "Felipe Rodrigues",
-                menteeProject: "test2",
-                stage: "test2",
-              })
-            }
-          />
-          <HistoryRow
-            date="04/ago"
-            name="Felipe Rodrigues"
-            role="Mentor"
-            score="3.0"
-            onClick={() =>
-              setSelectedMeeting({
-                dateLabel: "4 de ago. de 2026, 10:00",
-                menteeName: "Felipe Rodrigues",
-                menteeProject: "test2",
-                stage: "test2",
-              })
-            }
-          />
-          <HistoryRow
-            date="03/ago"
-            name="Felipe Rodrigues"
-            role="Mentor"
-            score="3.0"
-            onClick={() =>
-              setSelectedMeeting({
-                dateLabel: "3 de ago. de 2026, 10:00",
-                menteeName: "Felipe Rodrigues",
-                menteeProject: "test2",
-                stage: "test2",
-              })
-            }
-          />
+          {historicoFiltrado.length === 0 ? (
+            <p className="py-8 text-center text-sm text-muted-foreground">Nada pra exibir nesse filtro.</p>
+          ) : (
+            historicoFiltrado.map((item) => (
+              <HistoryRow
+                key={item.date}
+                date={item.date}
+                name={item.name}
+                role={item.role}
+                score={item.score}
+                onClick={() =>
+                  setSelectedMeeting({
+                    dateLabel: item.dateLabel,
+                    menteeName: item.name,
+                    menteeProject: item.menteeProject,
+                    stage: item.stage,
+                  })
+                }
+              />
+            ))
+          )}
         </CardContent>
       </Card>
 
@@ -1738,18 +1788,21 @@ function MentoradoDashboard() {
           </p>
         </div>
 
-        <Select value={periodo} onValueChange={(value) => setPeriodo(value as typeof periodo)}>
-          <SelectTrigger className="h-9 w-[180px] text-xs">
-            <SelectValue placeholder="Período" />
-          </SelectTrigger>
-          <SelectContent>
-            {MENTORADO_PERIOD_OPTIONS.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex flex-col items-end gap-1">
+          <Select value={periodo} onValueChange={(value) => setPeriodo(value as typeof periodo)}>
+            <SelectTrigger className="h-9 w-[180px] text-xs">
+              <SelectValue placeholder="Período" />
+            </SelectTrigger>
+            <SelectContent>
+              {MENTORADO_PERIOD_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <span className="text-[10px] text-muted-foreground">Afeta: Sua nota como mentorado</span>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -2352,6 +2405,29 @@ function EditUserDialog({
 }
 
 function MentoriasSection() {
+  const [mentorEmail, setMentorEmail] = useState("")
+  const [mentoradoEmail, setMentoradoEmail] = useState("")
+  const [projectName, setProjectName] = useState("")
+  const [feedback, setFeedback] = useState<{ kind: "success" | "error"; message: string } | null>(null)
+
+  const podeCriar = Boolean(mentorEmail && mentoradoEmail && projectName)
+
+  function handleCriarMentoria() {
+    if (!podeCriar) {
+      setFeedback({ kind: "error", message: "Preencha Mentor, Mentorado e Projeto antes de criar a mentoria." })
+      return
+    }
+    const mentor = BACKOFFICE_USERS.find((user) => user.email === mentorEmail)
+    const mentorado = BACKOFFICE_USERS.find((user) => user.email === mentoradoEmail)
+    setFeedback({
+      kind: "success",
+      message: `Mentoria criada: ${mentor?.name} × ${mentorado?.name} (projeto ${projectName}).`,
+    })
+    setMentorEmail("")
+    setMentoradoEmail("")
+    setProjectName("")
+  }
+
   return (
     <div className="space-y-4">
       <Card className="shadow-sm">
@@ -2364,7 +2440,13 @@ function MentoriasSection() {
               <Label className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
                 Mentor *
               </Label>
-              <Select>
+              <Select
+                value={mentorEmail}
+                onValueChange={(value) => {
+                  setMentorEmail(value)
+                  setFeedback(null)
+                }}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione..." />
                 </SelectTrigger>
@@ -2381,7 +2463,13 @@ function MentoriasSection() {
               <Label className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
                 Mentorado *
               </Label>
-              <Select>
+              <Select
+                value={mentoradoEmail}
+                onValueChange={(value) => {
+                  setMentoradoEmail(value)
+                  setFeedback(null)
+                }}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione..." />
                 </SelectTrigger>
@@ -2400,7 +2488,13 @@ function MentoriasSection() {
             <Label className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
               Projeto *
             </Label>
-            <Select>
+            <Select
+              value={projectName}
+              onValueChange={(value) => {
+                setProjectName(value)
+                setFeedback(null)
+              }}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Selecione..." />
               </SelectTrigger>
@@ -2414,8 +2508,19 @@ function MentoriasSection() {
             </Select>
           </div>
 
+          {feedback && (
+            <p
+              className={cn(
+                "text-sm",
+                feedback.kind === "success" ? "text-emerald-600 dark:text-emerald-400" : "text-destructive",
+              )}
+            >
+              {feedback.message}
+            </p>
+          )}
+
           <div className="flex justify-end">
-            <Button>Criar Mentoria</Button>
+            <Button onClick={handleCriarMentoria}>Criar Mentoria</Button>
           </div>
         </CardContent>
       </Card>
@@ -2816,8 +2921,8 @@ function BackofficeDashboard() {
       ) : (
         <Card className="shadow-sm">
           <CardContent className="py-12 flex flex-col items-center gap-3">
-            <Lock className="h-10 w-10 text-muted-foreground/40" />
-            <p className="text-sm text-muted-foreground">Nenhuma informação disponível em "{section}".</p>
+            <Info className="h-10 w-10 text-muted-foreground/40" />
+            <p className="text-sm text-muted-foreground">Seção "{section}" ainda não foi implementada.</p>
           </CardContent>
         </Card>
       )}
