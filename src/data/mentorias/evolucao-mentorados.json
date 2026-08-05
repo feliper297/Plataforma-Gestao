@@ -1,0 +1,110 @@
+[
+  {
+    "nome": "Alysson",
+    "meta": 80,
+    "meses": [
+      { "mes": "Abril", "semanas": [100, 0, 0, null], "media": 33.33 },
+      { "mes": "Maio", "semanas": [null, 50, null, 100], "media": 75 },
+      { "mes": "Junho", "semanas": [null, null, 100, 100], "media": 100 },
+      { "mes": "Julho", "semanas": [100, 100, 100, null], "media": 100 }
+    ],
+    "mediaTotal": 77.08,
+    "evolucaoClara": { "sim": 8, "nao": 3 }
+  },
+  {
+    "nome": "Felipe",
+    "meta": 80,
+    "meses": [
+      { "mes": "Abril", "semanas": [null, 100, null, 100], "media": 100 },
+      { "mes": "Maio", "semanas": [100, 0, 100, 100], "media": 75 },
+      { "mes": "Junho", "semanas": [null, null, null, 100], "media": 100 },
+      { "mes": "Julho", "semanas": [null, null, null, null], "media": null }
+    ],
+    "mediaTotal": 91.67,
+    "evolucaoClara": { "sim": 6, "nao": 1 }
+  },
+  {
+    "nome": "Minoro",
+    "meta": 80,
+    "meses": [
+      { "mes": "Abril", "semanas": [0, null, 100, null], "media": 50 },
+      { "mes": "Maio", "semanas": [null, 100, null, 0], "media": 50 },
+      { "mes": "Junho", "semanas": [null, null, 0, null], "media": 0 },
+      { "mes": "Julho", "semanas": [null, 0, null, null], "media": 0 }
+    ],
+    "mediaTotal": 25,
+    "evolucaoClara": { "sim": 2, "nao": 4 }
+  },
+  {
+    "nome": "Oliveira",
+    "meta": 80,
+    "meses": [
+      { "mes": "Abril", "semanas": [null, 0, null, 100], "media": 50 },
+      { "mes": "Maio", "semanas": [null, null, 100, 100], "media": 100 },
+      { "mes": "Junho", "semanas": [100, null, 100, null], "media": 100 },
+      { "mes": "Julho", "semanas": [100, 100, null, null], "media": 100 }
+    ],
+    "mediaTotal": 87.5,
+    "evolucaoClara": { "sim": 7, "nao": 1 }
+  },
+  {
+    "nome": "Rafael",
+    "meta": 80,
+    "meses": [
+      { "mes": "Abril", "semanas": [100, null, 100, null], "media": 100 },
+      { "mes": "Maio", "semanas": [null, null, 100, 0], "media": 50 },
+      { "mes": "Junho", "semanas": [null, null, 50, null], "media": 50 },
+      { "mes": "Julho", "semanas": [100, 100, 0, null], "media": 66.67 }
+    ],
+    "mediaTotal": 66.67,
+    "evolucaoClara": { "sim": 6, "nao": 3 }
+  },
+  {
+    "nome": "Ryan",
+    "meta": 80,
+    "meses": [
+      { "mes": "Abril", "semanas": [null, 100, 100, 100], "media": 100 },
+      { "mes": "Maio", "semanas": [100, null, 100, 100], "media": 100 },
+      { "mes": "Junho", "semanas": [100, null, 100, 100], "media": 100 },
+      { "mes": "Julho", "semanas": [100, 100, null, null], "media": 100 }
+    ],
+    "mediaTotal": 100,
+    "evolucaoClara": { "sim": 11, "nao": 0 }
+  },
+  {
+    "nome": "Santana",
+    "meta": 80,
+    "meses": [
+      { "mes": "Abril", "semanas": [100, 100, 100, null], "media": 100 },
+      { "mes": "Maio", "semanas": [100, null, 100, 100], "media": 100 },
+      { "mes": "Junho", "semanas": [null, null, 100, 100], "media": 100 },
+      { "mes": "Julho", "semanas": [100, null, null, null], "media": 100 }
+    ],
+    "mediaTotal": 100,
+    "evolucaoClara": { "sim": 9, "nao": 0 }
+  },
+  {
+    "nome": "Viana",
+    "meta": 80,
+    "meses": [
+      { "mes": "Abril", "semanas": [100, 0, 100, null], "media": 66.67 },
+      { "mes": "Maio", "semanas": [null, 50, 100, 100], "media": 83.33 },
+      { "mes": "Junho", "semanas": [null, null, 0, 100], "media": 100 },
+      { "mes": "Julho", "semanas": [100, null, null, null], "media": 100 }
+    ],
+    "mediaTotal": 87.5,
+    "evolucaoClara": { "sim": 7, "nao": 3 }
+  },
+  {
+    "nome": "Wagner",
+    "meta": 80,
+    "meses": [
+      { "mes": "Abril", "semanas": [null, 100, 100, 100], "media": 100 },
+      { "mes": "Maio", "semanas": [100, null, null, 50], "media": 75 },
+      { "mes": "Junho", "semanas": [null, null, null, 100], "media": 100 },
+      { "mes": "Julho", "semanas": [0, null, null, null], "media": 0 }
+    ],
+    "mediaTotal": 68.75,
+    "evolucaoClara": { "sim": 6, "nao": 2 }
+  }
+]
