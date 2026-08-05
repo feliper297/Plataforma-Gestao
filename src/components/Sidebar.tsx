@@ -218,9 +218,9 @@ function SidebarGroup({
   )
 }
 
-// ── Sidebar ───────────────────────────────────────────────────────────────────
+// ── Sidebar content (shared between desktop rail and mobile drawer) ─────────
 
-export function Sidebar({
+export function SidebarNavContent({
   activeValue,
   onSelect,
 }: {
@@ -228,7 +228,7 @@ export function Sidebar({
   onSelect: (value: string) => void
 }) {
   return (
-    <aside className="relative flex h-screen w-[220px] flex-col border-r bg-card text-card-foreground shrink-0">
+    <>
       {/* ── Workspace Header ── */}
       <div className="flex h-14 items-center border-b px-3">
         <button
@@ -245,6 +245,22 @@ export function Sidebar({
           <SidebarGroup key={i} group={group} collapsed={false} activeValue={activeValue} onSelect={onSelect} />
         ))}
       </nav>
+    </>
+  )
+}
+
+// ── Sidebar (desktop rail — hidden below md, shown by parent as a drawer) ───
+
+export function Sidebar({
+  activeValue,
+  onSelect,
+}: {
+  activeValue: string
+  onSelect: (value: string) => void
+}) {
+  return (
+    <aside className="relative flex h-screen w-[220px] flex-col border-r bg-card text-card-foreground shrink-0">
+      <SidebarNavContent activeValue={activeValue} onSelect={onSelect} />
     </aside>
   )
 }

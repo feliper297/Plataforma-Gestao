@@ -12,6 +12,7 @@ import {
   ListChecks,
   Lock,
   Megaphone,
+  Menu,
   Moon,
   Pencil,
   Plus,
@@ -28,7 +29,7 @@ import {
 
 import LoginPage from "@/components/LoginPage"
 import SignUpPage from "@/components/SignUpPage"
-import { Sidebar } from "@/components/Sidebar"
+import { Sidebar, SidebarNavContent } from "@/components/Sidebar"
 import { UserMenu } from "@/components/UserMenu"
 import FigmaExport, { type FigmaExportScreen } from "@/pages/FigmaExport"
 import RelatorioMentorias from "@/pages/RelatorioMentorias"
@@ -3073,6 +3074,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState(forcedTab ?? "dashboard")
   const [alertsOpen, setAlertsOpen] = useState(false)
   const [showProfile, setShowProfile] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   if (screenParam === "login" || screenParam === "dashboard" || screenParam === "user-menu") {
     return <FigmaExport screen={screenParam} />
@@ -3102,14 +3104,30 @@ export default function App() {
     <TooltipProvider>
       <div className="flex h-screen overflow-hidden bg-background text-foreground">
 
-        {/* ── Sidebar ── */}
-        <Sidebar
-          activeValue={activeTab}
-          onSelect={(value) => {
-            setActiveTab(value)
-            setShowProfile(false)
-          }}
-        />
+        {/* ── Sidebar (desktop rail, hidden below md) ── */}
+        <div className="hidden md:block">
+          <Sidebar
+            activeValue={activeTab}
+            onSelect={(value) => {
+              setActiveTab(value)
+              setShowProfile(false)
+            }}
+          />
+        </div>
+
+        {/* ── Sidebar (mobile drawer) ── */}
+        <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+          <SheetContent side="left" className="flex w-[260px] max-w-[80vw] flex-col p-0">
+            <SidebarNavContent
+              activeValue={activeTab}
+              onSelect={(value) => {
+                setActiveTab(value)
+                setShowProfile(false)
+                setSidebarOpen(false)
+              }}
+            />
+          </SheetContent>
+        </Sheet>
 
         {/* ── Main column ── */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-1 flex-col min-w-0 overflow-hidden">
@@ -3118,9 +3136,20 @@ export default function App() {
           <header className="shrink-0 bg-background/90 backdrop-blur-md z-40">
 
             {/* Top row */}
-            <div className="flex h-14 items-center gap-3 border-b px-8">
+            <div className="flex h-14 items-center gap-2 sm:gap-3 border-b px-3 sm:px-6 lg:px-8">
+              {/* Mobile menu trigger */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 shrink-0 text-muted-foreground hover:bg-muted hover:text-foreground md:hidden"
+                onClick={() => setSidebarOpen(true)}
+              >
+                <Menu className="h-4 w-4" />
+                <span className="sr-only">Abrir menu</span>
+              </Button>
+
               {/* Search */}
-              <div className="relative flex-1 max-w-sm">
+              <div className="relative min-w-0 flex-1 sm:max-w-sm">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
                 <Input
                   type="search"
@@ -3129,7 +3158,7 @@ export default function App() {
                 />
               </div>
 
-              <div className="flex-1" />
+              <div className="hidden flex-1 sm:block" />
 
               <div className="flex items-center gap-1">
                 <Tooltip>
@@ -3166,7 +3195,7 @@ export default function App() {
 
           {/* ── Scrollable content ── */}
           <div className="flex-1 overflow-y-auto">
-            <div className="px-8 py-8 w-full">
+            <div className="px-3 py-6 sm:px-6 sm:py-8 lg:px-8 w-full">
               {showProfile ? (
                 <ProfileView onBack={() => setShowProfile(false)} />
               ) : (
