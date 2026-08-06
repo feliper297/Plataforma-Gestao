@@ -29,6 +29,7 @@ import {
 
 import LoginPage from "@/components/LoginPage"
 import SignUpPage from "@/components/SignUpPage"
+import ForgotPasswordPage from "@/components/ForgotPasswordPage"
 import { Sidebar, SidebarNavContent } from "@/components/Sidebar"
 import { UserMenu } from "@/components/UserMenu"
 import FigmaExport, { type FigmaExportScreen } from "@/pages/FigmaExport"
@@ -3036,7 +3037,7 @@ export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(
     () => !!forcedTab || localStorage.getItem("isAuthenticated") === "true",
   )
-  const [authView, setAuthView] = useState<"login" | "sign-up">("login")
+  const [authView, setAuthView] = useState<"login" | "sign-up" | "forgot-password">("login")
 
   function login() {
     localStorage.setItem("isAuthenticated", "true")
@@ -3073,7 +3074,16 @@ export default function App() {
         />
       )
     }
-    return <LoginPage onLogin={login} onGoToSignUp={() => setAuthView("sign-up")} />
+    if (authView === "forgot-password") {
+      return <ForgotPasswordPage onGoToLogin={() => setAuthView("login")} />
+    }
+    return (
+      <LoginPage
+        onLogin={login}
+        onGoToSignUp={() => setAuthView("sign-up")}
+        onGoToForgotPassword={() => setAuthView("forgot-password")}
+      />
+    )
   }
 
   return (

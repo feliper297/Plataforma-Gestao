@@ -9,9 +9,10 @@ import { Label } from "@/components/ui/label"
 interface LoginPageProps {
   onLogin: () => void
   onGoToSignUp?: () => void
+  onGoToForgotPassword?: () => void
 }
 
-export default function LoginPage({ onLogin, onGoToSignUp }: LoginPageProps) {
+export default function LoginPage({ onLogin, onGoToSignUp, onGoToForgotPassword }: LoginPageProps) {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
 
@@ -57,6 +58,14 @@ export default function LoginPage({ onLogin, onGoToSignUp }: LoginPageProps) {
                   onChange={(event) => setPassword(event.target.value)}
                   required
                 />
+                <Button
+                  variant="link"
+                  type="button"
+                  className="h-auto justify-end p-0 text-right text-xs font-normal"
+                  onClick={onGoToForgotPassword}
+                >
+                  Esqueci minha senha
+                </Button>
               </div>
 
               <Button type="submit" className="w-full" size="lg">

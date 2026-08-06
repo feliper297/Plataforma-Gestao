@@ -84,6 +84,20 @@ export function getMentorRanking(mentores: Mentor[]): RankingEntry[] {
     .map(m => ({ nome: m.nome, totalGeral: m.totalGeral }))
 }
 
+export function getMentorRankingByMonth(mentores: Mentor[], mes: MesNome | 'todos'): RankingEntry[] {
+  if (mes === 'todos') return getMentorRanking(mentores)
+
+  return [...mentores]
+    .map(mentor => {
+      const mesData = mentor.meses.find(m => m.mes === mes)
+      const totalGeral = mesData
+        ? mesData.total ?? mesData.semanas.reduce((soma: number, s) => soma + (s ?? 0), 0)
+        : 0
+      return { nome: mentor.nome, totalGeral }
+    })
+    .sort((a, b) => b.totalGeral - a.totalGeral)
+}
+
 export type GoalStatus = 'atingiu' | 'nao_atingiu' | 'em_andamento'
 
 export function getStatus(mes: Pick<MesData, 'total'>, metaMensal: number): GoalStatus {
