@@ -3033,8 +3033,20 @@ export default function App() {
   const screenParam = searchParams.get("screen")
   const forcedTab = searchParams.get("tab")
 
-  const [isAuthenticated, setIsAuthenticated] = useState(!!forcedTab)
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    () => !!forcedTab || localStorage.getItem("isAuthenticated") === "true",
+  )
   const [authView, setAuthView] = useState<"login" | "sign-up">("login")
+
+  function login() {
+    localStorage.setItem("isAuthenticated", "true")
+    setIsAuthenticated(true)
+  }
+
+  function logout() {
+    localStorage.removeItem("isAuthenticated")
+    setIsAuthenticated(false)
+  }
   const [activeTab, setActiveTab] = useState(forcedTab ?? "dashboard")
   const [alertsOpen, setAlertsOpen] = useState(false)
   const [showProfile, setShowProfile] = useState(false)
@@ -3056,12 +3068,12 @@ export default function App() {
     if (authView === "sign-up") {
       return (
         <SignUpPage
-          onSignUp={() => setIsAuthenticated(true)}
+          onSignUp={login}
           onGoToLogin={() => setAuthView("login")}
         />
       )
     }
-    return <LoginPage onLogin={() => setIsAuthenticated(true)} onGoToSignUp={() => setAuthView("sign-up")} />
+    return <LoginPage onLogin={login} onGoToSignUp={() => setAuthView("sign-up")} />
   }
 
   return (
@@ -3150,7 +3162,7 @@ export default function App() {
                   <TooltipContent side="bottom">Notificações</TooltipContent>
                 </Tooltip>
 
-                <UserMenu onLogout={() => setIsAuthenticated(false)} onProfile={() => setShowProfile(true)} />
+                <UserMenu onLogout={logout} onProfile={() => setShowProfile(true)} />
 
                 <AlertsSheet open={alertsOpen} onOpenChange={setAlertsOpen} />
               </div>
