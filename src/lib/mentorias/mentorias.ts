@@ -114,6 +114,23 @@ export function getGoalAdherence(mentores: Mentor[]): GoalAdherenceSlice[] {
   ]
 }
 
+export type GoalAdherenceMonthPoint = { mes: MesNome; atingiu: number; naoAtingiu: number }
+
+export function getGoalAdherenceByMonth(mentores: Mentor[]): GoalAdherenceMonthPoint[] {
+  return MESES.map((mesNome) => {
+    let atingiu = 0
+    let naoAtingiu = 0
+    for (const mentor of mentores) {
+      const mes = mentor.meses.find((m) => m.mes === mesNome)
+      if (!mes) continue
+      const status = getStatus(mes, mentor.metaMensal)
+      if (status === "atingiu") atingiu += 1
+      else if (status === "nao_atingiu") naoAtingiu += 1
+    }
+    return { mes: mesNome, atingiu, naoAtingiu }
+  })
+}
+
 export type MentorInativo = { id: string; nome: string; ultimasSemanas: (number | null)[] }
 
 // Aproxima "últimos 15 dias" pelas 2 últimas semanas de Julho (S02 e S03), já que os

@@ -1,53 +1,63 @@
-import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts"
+import { useMemo, useState } from "react"
+import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { getGoalAdherence } from "@/lib/mentorias/mentorias"
-import type { GoalStatus } from "@/lib/mentorias/mentorias"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { MESES, getGoalAdherenceByMonth } from "@/lib/mentorias/mentorias"
 import type { Mentor } from "@/types/mentoria"
 
-const COLORS: Record<GoalStatus, string> = {
-  atingiu: "#059669",
-  nao_atingiu: "var(--destructive)",
-  em_andamento: "var(--muted-foreground)",
-}
-
-function renderValueLabel({ cx, cy, midAngle, outerRadius, value }: any) {
-  const RADIAN = Math.PI / 180
-  const radius = outerRadius + 18
-  const x = cx + radius * Math.cos(-midAngle * RADIAN)
-  const y = cy + radius * Math.sin(-midAngle * RADIAN)
-  return (
-    <text x={x} y={y} textAnchor={x > cx ? "start" : "end"} dominantBaseline="central" className="fill-foreground text-xs font-bold tabular-nums">
-      {value}
-    </text>
-  )
-}
+const COLOR_ATINGIU = "#059669"
+const COLOR_NAO_ATINGIU = "var(--destructive)"
 
 export default function GoalAdherenceChart({ mentores }: { mentores: Mentor[] }) {
-  const data = getGoalAdherence(mentores)
+  const [mesFiltro, setMesFiltro] = useState("todos")
+
+  const pontos = useMemo(() => getGoalAdherenceByMonth(mentores), [mentores])
+  const pontosPct = useMemo(
+    () =>
+      pontos.map((p) => {
+        const total = p.atingiu + p.naoAtingiu
+        return {
+          mes: p.mes,
+          atingiuPct: total > 0 ? Number(((p.atingiu / total) * 100).toFixed(1)) : 0,
+          naoAtingiuPct: total > 0 ? Number(((p.naoAtingiu / total) * 100).toFixed(1)) : 0,
+        }
+      }),
+    [pontos],
+  )
+  const data = mesFiltro === "todos" ? pontosPct : pontosPct.filter((p) => p.mes === mesFiltro)
 
   return (
-    <Card className="shadow-sm">
+    <Card className="flex h-full flex-col shadow-sm">
       <CardHeader className="border-b py-4 px-5">
-        <CardTitle className="text-base font-semibold">Aderência à meta (mentor × mês)</CardTitle>
-      </CardHeader>
-      <CardContent className="pt-5 px-5 pb-5">
-        <ResponsiveContainer width="100%" height={300}>
-          <PieChart margin={{ top: 30, right: 40, bottom: 30, left: 40 }}>
-            <Pie
-              data={data}
-              dataKey="value"
-              nameKey="status"
-              innerRadius={60}
-              outerRadius={90}
-              paddingAngle={2}
-              label={renderValueLabel}
-              labelLine={false}
-            >
-              {data.map((entry) => (
-                <Cell key={entry.statusKey} fill={COLORS[entry.statusKey]} />
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <CardTitle className="text-base font-semibold">Aderência à meta (mentor × mês)</CardTitle>
+          <Select value={mesFiltro} onValueChange={setMesFiltro}>
+            <SelectTrigger className="h-9 w-[150px] text-xs">
+              <SelectValue placeholder="Mês" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos os meses</SelectItem>
+              {MESES.map((mes) => (
+                <SelectItem key={mes} value={mes}>
+                  {mes}
+                </SelectItem>
               ))}
-            </Pie>
+            </SelectContent>
+          </Select>
+        </div>
+      </CardHeader>
+      <CardContent className="flex flex-1 flex-col justify-center pt-5 px-5 pb-5">
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={data} margin={{ top: 10, right: 10, bottom: 10, left: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+            <XAxis dataKey="mes" tick={{ fontSize: 12, fill: "var(--muted-foreground)" }} />
+            <YAxis
+              tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
+              tickFormatter={(v) => `${v}%`}
+              domain={[0, 100]}
+            />
             <Tooltip
+              formatter={(value: number) => `${value}%`}
               contentStyle={{
                 backgroundColor: "var(--popover)",
                 borderColor: "var(--border)",
@@ -56,8 +66,16 @@ export default function GoalAdherenceChart({ mentores }: { mentores: Mentor[] })
                 color: "var(--popover-foreground)",
               }}
             />
-            <Legend wrapperStyle={{ fontSize: 12, color: "var(--muted-foreground)" }} />
-          </PieChart>
+            <Legend
+              payload={[
+                { value: "Atingiu meta", type: "square", color: COLOR_ATINGIU },
+                { value: "Não atingiu", type: "square", color: COLOR_NAO_ATINGIU },
+              ]}
+              wrapperStyle={{ fontSize: 12, color: "var(--muted-foreground)" }}
+            />
+            <Bar dataKey="atingiuPct" name="Atingiu meta" stackId="status" fill={COLOR_ATINGIU} radius={[0, 0, 0, 0]} />
+            <Bar dataKey="naoAtingiuPct" name="Não atingiu" stackId="status" fill={COLOR_NAO_ATINGIU} radius={[4, 4, 0, 0]} />
+          </BarChart>
         </ResponsiveContainer>
       </CardContent>
     </Card>

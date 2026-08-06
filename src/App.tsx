@@ -536,68 +536,32 @@ function SessionsChartCard() {
 
 function AdherenceDonut() {
   const total = ADHERENCE_SEGMENTS.reduce((sum, seg) => sum + seg.value, 0)
-  const cx = 110
-  const cy = 110
-  const r = 72
-  const strokeWidth = 26
-  const circumference = 2 * Math.PI * r
-  const gap = 6
 
-  let cumulative = 0
-  const arcs = ADHERENCE_SEGMENTS.map((seg) => {
-    const fraction = seg.value / total
-    const length = Math.max(fraction * circumference - gap, 0)
-    const offset = -cumulative * circumference
-    const midAngleDeg = cumulative * 360 + fraction * 180 - 90
-    const midAngleRad = (midAngleDeg * Math.PI) / 180
-    const labelR = r + strokeWidth / 2 + 16
-    cumulative += fraction
-    return {
-      ...seg,
-      dasharray: `${length} ${circumference - length}`,
-      dashoffset: offset,
-      labelX: cx + labelR * Math.cos(midAngleRad),
-      labelY: cy + labelR * Math.sin(midAngleRad),
-    }
-  })
+  const segments = ADHERENCE_SEGMENTS.map((seg) => ({
+    ...seg,
+    pct: (seg.value / total) * 100,
+  }))
 
   return (
-    <div className="flex flex-col items-center gap-4">
-      <svg viewBox="0 0 220 220" className="h-52 w-52">
-        <g transform={`rotate(-90 ${cx} ${cy})`}>
-          {arcs.map((arc) => (
-            <circle
-              key={arc.label}
-              cx={cx}
-              cy={cy}
-              r={r}
-              fill="none"
-              stroke={arc.color}
-              strokeWidth={strokeWidth}
-              strokeDasharray={arc.dasharray}
-              strokeDashoffset={arc.dashoffset}
-              strokeLinecap="round"
-            />
-          ))}
-        </g>
-        {arcs.map((arc) => (
-          <text
-            key={`label-${arc.label}`}
-            x={arc.labelX}
-            y={arc.labelY}
-            textAnchor="middle"
-            dominantBaseline="middle"
-            className="fill-foreground text-sm font-bold tabular-nums"
+    <div className="flex flex-col gap-4">
+      <div className="flex h-8 w-full overflow-hidden rounded-md bg-muted/40">
+        {segments.map((seg) => (
+          <div
+            key={seg.label}
+            className="flex h-full items-center justify-center first:rounded-l-md last:rounded-r-md"
+            style={{ width: `${seg.pct}%`, backgroundColor: seg.color }}
           >
-            {arc.value}
-          </text>
+            {seg.pct >= 10 && (
+              <span className="text-xs font-bold tabular-nums text-white drop-shadow-sm">{seg.value}</span>
+            )}
+          </div>
         ))}
-      </svg>
+      </div>
       <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5">
         {ADHERENCE_SEGMENTS.map((seg) => (
           <span key={seg.label} className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <span className="h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: seg.color }} />
-            {seg.label}
+            {seg.label} · <span className="tabular-nums font-medium text-foreground">{seg.value}</span>
           </span>
         ))}
       </div>
