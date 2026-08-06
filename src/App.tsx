@@ -2823,7 +2823,11 @@ function BackofficeDashboard() {
           {BACKOFFICE_SECTIONS.map((option) => {
             const Icon = BACKOFFICE_SECTION_ICONS[option]
             return (
-              <TabsTrigger key={option} value={option} className="gap-1.5">
+              <TabsTrigger
+                key={option}
+                value={option}
+                className="gap-1.5 data-[state=active]:border-primary data-[state=active]:text-primary"
+              >
                 <Icon className="h-3.5 w-3.5" />
                 {option}
               </TabsTrigger>
