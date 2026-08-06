@@ -30,7 +30,7 @@ export default function SignUpPage({ onSignUp, onGoToLogin }: SignUpPageProps) {
         <Card>
           <CardHeader className="text-center">
             <CardTitle className="text-xl">Criar conta</CardTitle>
-            <CardDescription>Cadastre-se para acessar a mentoria</CardDescription>
+            <CardDescription>Cadastre-se para acessar a PeopleHub</CardDescription>
           </CardHeader>
 
           <CardContent>

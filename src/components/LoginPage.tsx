@@ -28,7 +28,7 @@ export default function LoginPage({ onLogin, onGoToSignUp }: LoginPageProps) {
         <Card>
           <CardHeader className="text-center">
             <CardTitle className="text-xl">Entrar</CardTitle>
-            <CardDescription>Acesse sua conta de mentoria</CardDescription>
+            <CardDescription>Acesse sua conta</CardDescription>
           </CardHeader>
 
           <CardContent>
