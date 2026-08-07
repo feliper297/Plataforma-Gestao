@@ -2823,11 +2823,13 @@ function BackofficeDashboard() {
         <TabsList className="h-auto justify-start gap-1 px-0">
           {BACKOFFICE_SECTIONS.map((option) => {
             const Icon = BACKOFFICE_SECTION_ICONS[option]
+            const isActive = option === section
             return (
               <TabsTrigger
                 key={option}
                 value={option}
-                className="gap-1.5 data-[state=active]:border-primary data-[state=active]:text-primary"
+                style={isActive ? { borderBottomColor: "var(--primary)", color: "var(--primary)" } : undefined}
+                className="gap-1.5"
               >
                 <Icon className="h-3.5 w-3.5" />
                 {option}
