@@ -91,7 +91,7 @@ function SidebarItem({
   const hasTrailing = item.badge !== undefined || !!item.children
 
   const baseClass = cn(
-    "group/item relative grid w-full items-center gap-x-4 rounded-lg px-2.5 py-2 text-left text-sm transition-colors",
+    "group/item relative grid w-full items-center gap-x-2 rounded-lg px-2.5 py-2 text-left text-sm transition-colors",
     hasTrailing ? "grid-cols-[16px_1fr_auto]" : "grid-cols-[16px_1fr]",
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
     depth > 0 ? "pl-8" : "",
