@@ -72,7 +72,7 @@ export default function FigmaExport({ screen }: FigmaExportProps) {
   if (screen === "login") {
     return (
       <div className="h-[900px] w-[1440px] overflow-hidden">
-        <LoginPage onLogin={() => undefined} />
+        <LoginPage onLogin={() => true} />
       </div>
     )
   }

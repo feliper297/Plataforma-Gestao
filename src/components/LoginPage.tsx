@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
 interface LoginPageProps {
-  onLogin: () => void
+  onLogin: (email: string) => boolean
   onGoToSignUp?: () => void
   onGoToForgotPassword?: () => void
 }
@@ -15,10 +15,12 @@ interface LoginPageProps {
 export default function LoginPage({ onLogin, onGoToSignUp, onGoToForgotPassword }: LoginPageProps) {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [error, setError] = useState(false)
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    onLogin()
+    const success = onLogin(email)
+    setError(!success)
   }
 
   return (
@@ -42,9 +44,17 @@ export default function LoginPage({ onLogin, onGoToSignUp, onGoToForgotPassword 
                   autoComplete="email"
                   placeholder="seu@email.com"
                   value={email}
-                  onChange={(event) => setEmail(event.target.value)}
+                  onChange={(event) => {
+                    setEmail(event.target.value)
+                    setError(false)
+                  }}
                   required
                 />
+                {error && (
+                  <p className="text-xs text-destructive">
+                    E-mail não reconhecido. Use mentor@gmail.com, mentorado@gmail.com ou admin@gmail.com.
+                  </p>
+                )}
               </div>
 
               <div className="grid gap-2">

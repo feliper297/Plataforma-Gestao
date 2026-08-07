@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
+import { TABS_BY_ROLE, type UserRole } from "@/types/auth"
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -51,6 +52,22 @@ const NAV_GROUPS: NavGroup[] = [
     ],
   },
 ]
+
+function getNavGroupsForRole(role: UserRole): NavGroup[] {
+  const allowed = TABS_BY_ROLE[role]
+  return NAV_GROUPS.map((group) => ({
+    ...group,
+    items: group.items
+      .map((item) => {
+        if (item.children) {
+          const children = item.children.filter((child) => !child.value || allowed.includes(child.value))
+          return children.length > 0 ? { ...item, children } : null
+        }
+        return !item.value || allowed.includes(item.value) ? item : null
+      })
+      .filter((item): item is NavItem => item !== null),
+  })).filter((group) => group.items.length > 0)
+}
 
 // ── Sidebar Nav Item ──────────────────────────────────────────────────────────
 
@@ -223,16 +240,21 @@ function SidebarGroup({
 export function SidebarNavContent({
   activeValue,
   onSelect,
+  role,
 }: {
   activeValue: string
   onSelect: (value: string) => void
+  role: UserRole
 }) {
+  const navGroups = getNavGroupsForRole(role)
+  const homeValue = TABS_BY_ROLE[role][0]
+
   return (
     <>
       {/* ── Workspace Header ── */}
       <div className="flex h-14 items-center border-b px-3">
         <button
-          onClick={() => onSelect("dashboard")}
+          onClick={() => onSelect(homeValue)}
           className="group flex w-full items-center rounded-lg px-1.5 py-1.5 transition-colors hover:bg-accent"
         >
           <BrandMark size="sm" />
@@ -241,7 +263,7 @@ export function SidebarNavContent({
 
       {/* ── Navigation ── */}
       <nav className="flex-1 overflow-y-auto py-3 space-y-4 px-2">
-        {NAV_GROUPS.map((group, i) => (
+        {navGroups.map((group, i) => (
           <SidebarGroup key={i} group={group} collapsed={false} activeValue={activeValue} onSelect={onSelect} />
         ))}
       </nav>
@@ -252,15 +274,17 @@ export function SidebarNavContent({
 // ── Sidebar (desktop rail — hidden below md, shown by parent as a drawer) ───
 
 export function Sidebar({
-  activeValue,
-  onSelect,
+  activeValue = "mentor",
+  onSelect = () => undefined,
+  role = "admin",
 }: {
-  activeValue: string
-  onSelect: (value: string) => void
+  activeValue?: string
+  onSelect?: (value: string) => void
+  role?: UserRole
 }) {
   return (
     <aside className="relative flex h-screen w-[220px] flex-col border-r bg-card text-card-foreground shrink-0">
-      <SidebarNavContent activeValue={activeValue} onSelect={onSelect} />
+      <SidebarNavContent activeValue={activeValue} onSelect={onSelect} role={role} />
     </aside>
   )
 }

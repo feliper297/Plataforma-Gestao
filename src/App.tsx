@@ -30,6 +30,7 @@ import {
 import LoginPage from "@/components/LoginPage"
 import SignUpPage from "@/components/SignUpPage"
 import ForgotPasswordPage from "@/components/ForgotPasswordPage"
+import { DEFAULT_TAB_BY_ROLE, TABS_BY_ROLE, getRoleByEmail, type UserRole } from "@/types/auth"
 import { Sidebar, SidebarNavContent } from "@/components/Sidebar"
 import { UserMenu } from "@/components/UserMenu"
 import FigmaExport, { type FigmaExportScreen } from "@/pages/FigmaExport"
@@ -3038,21 +3039,40 @@ export default function App() {
   const screenParam = searchParams.get("screen")
   const forcedTab = searchParams.get("tab")
 
-  const [isAuthenticated, setIsAuthenticated] = useState(
-    () => !!forcedTab || localStorage.getItem("isAuthenticated") === "true",
-  )
+  const storedRole = localStorage.getItem("userRole") as UserRole | null
+  const hasValidStoredSession = localStorage.getItem("isAuthenticated") === "true" && storedRole !== null
+
+  const [isAuthenticated, setIsAuthenticated] = useState(() => !!forcedTab || hasValidStoredSession)
+  const [userRole, setUserRole] = useState<UserRole>(() => storedRole ?? "mentorado")
   const [authView, setAuthView] = useState<"login" | "sign-up" | "forgot-password">("login")
 
-  function login() {
+  function loginAsRole(role: UserRole) {
     localStorage.setItem("isAuthenticated", "true")
+    localStorage.setItem("userRole", role)
+    setUserRole(role)
     setIsAuthenticated(true)
+    setActiveTabState(DEFAULT_TAB_BY_ROLE[role])
+  }
+
+  function login(email: string) {
+    const role = getRoleByEmail(email)
+    if (!role) return false
+    loginAsRole(role)
+    return true
   }
 
   function logout() {
     localStorage.removeItem("isAuthenticated")
+    localStorage.removeItem("userRole")
     setIsAuthenticated(false)
   }
-  const [activeTab, setActiveTab] = useState(forcedTab ?? "dashboard")
+
+  const allowedTabs = TABS_BY_ROLE[userRole]
+  const [activeTab, setActiveTabState] = useState(forcedTab ?? DEFAULT_TAB_BY_ROLE[userRole])
+
+  function setActiveTab(value: string) {
+    setActiveTabState(allowedTabs.includes(value) ? value : DEFAULT_TAB_BY_ROLE[userRole])
+  }
   const [alertsOpen, setAlertsOpen] = useState(false)
   const [showProfile, setShowProfile] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -3073,7 +3093,7 @@ export default function App() {
     if (authView === "sign-up") {
       return (
         <SignUpPage
-          onSignUp={login}
+          onSignUp={() => loginAsRole("mentorado")}
           onGoToLogin={() => setAuthView("login")}
         />
       )
@@ -3098,6 +3118,7 @@ export default function App() {
         <div className="hidden md:block">
           <Sidebar
             activeValue={activeTab}
+            role={userRole}
             onSelect={(value) => {
               setActiveTab(value)
               setShowProfile(false)
@@ -3110,6 +3131,7 @@ export default function App() {
           <SheetContent side="left" className="flex w-[260px] max-w-[80vw] flex-col p-0">
             <SidebarNavContent
               activeValue={activeTab}
+              role={userRole}
               onSelect={(value) => {
                 setActiveTab(value)
                 setShowProfile(false)
@@ -3190,21 +3212,31 @@ export default function App() {
                 <ProfileView onBack={() => setShowProfile(false)} />
               ) : (
                 <>
-                  <TabsContent value="dashboard" className="mt-0">
-                    <RelatorioMentorias />
-                  </TabsContent>
-                  <TabsContent value="mentor" className="mt-0">
-                    <MentorDashboard />
-                  </TabsContent>
-                  <TabsContent value="mentorado" className="mt-0">
-                    <MentoradoDashboard />
-                  </TabsContent>
-                  <TabsContent value="reunioes" className="mt-0">
-                    <ReunioesDashboard />
-                  </TabsContent>
-                  <TabsContent value="backoffice" className="mt-0">
-                    <BackofficeDashboard />
-                  </TabsContent>
+                  {allowedTabs.includes("dashboard") && (
+                    <TabsContent value="dashboard" className="mt-0">
+                      <RelatorioMentorias />
+                    </TabsContent>
+                  )}
+                  {allowedTabs.includes("mentor") && (
+                    <TabsContent value="mentor" className="mt-0">
+                      <MentorDashboard />
+                    </TabsContent>
+                  )}
+                  {allowedTabs.includes("mentorado") && (
+                    <TabsContent value="mentorado" className="mt-0">
+                      <MentoradoDashboard />
+                    </TabsContent>
+                  )}
+                  {allowedTabs.includes("reunioes") && (
+                    <TabsContent value="reunioes" className="mt-0">
+                      <ReunioesDashboard />
+                    </TabsContent>
+                  )}
+                  {allowedTabs.includes("backoffice") && (
+                    <TabsContent value="backoffice" className="mt-0">
+                      <BackofficeDashboard />
+                    </TabsContent>
+                  )}
                 </>
               )}
             </div>
