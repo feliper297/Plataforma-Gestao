@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import {
   ArrowLeft,
   ArrowRight,
@@ -1934,7 +1934,9 @@ const BACKOFFICE_PROJECTS: BackofficeProject[] = [
 ]
 
 function NewProjectDialog() {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(
+    () => new URLSearchParams(window.location.search).get("modal") === "novo-projeto",
+  )
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -2231,12 +2233,24 @@ function EditUserDialog({
   user,
   allUsers,
   onSave,
+  openOnModal,
 }: {
   user: BackofficeUser
   allUsers: BackofficeUser[]
   onSave: (user: BackofficeUser) => void
+  openOnModal?: string
 }) {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(
+    () => !!openOnModal && new URLSearchParams(window.location.search).get("modal") === openOnModal,
+  )
+
+  useEffect(() => {
+    if (!openOnModal) return
+    if (new URLSearchParams(window.location.search).get("modal") === openOnModal) {
+      setOpen(true)
+    }
+  }, [openOnModal])
+
   const [role, setRole] = useState(user.role)
   const [project, setProject] = useState(user.project ?? NONE_VALUE)
   const [permission, setPermission] = useState<UserPermission>(user.permission)
@@ -2521,7 +2535,7 @@ function UsersTableCard() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {users.map((user) => (
+            {users.map((user, index) => (
               <TableRow key={user.id}>
                 <TableCell>
                   <div className="flex min-w-0 items-center gap-3">
@@ -2574,7 +2588,12 @@ function UsersTableCard() {
                   </div>
                 </TableCell>
                 <TableCell>
-                  <EditUserDialog user={user} allUsers={users} onSave={handleSaveUser} />
+                  <EditUserDialog
+                    user={user}
+                    allUsers={users}
+                    onSave={handleSaveUser}
+                    openOnModal={index === 0 ? "editar-usuario" : undefined}
+                  />
                 </TableCell>
               </TableRow>
             ))}
@@ -2603,10 +2622,21 @@ interface StageFormDialogProps {
   submitLabel: string
   initialStage?: BackofficeStage
   onSubmit: (stage: BackofficeStage) => void
+  openOnModal?: string
 }
 
-function StageFormDialog({ trigger, title, submitLabel, initialStage, onSubmit }: StageFormDialogProps) {
-  const [open, setOpen] = useState(false)
+function StageFormDialog({ trigger, title, submitLabel, initialStage, onSubmit, openOnModal }: StageFormDialogProps) {
+  const [open, setOpen] = useState(
+    () => !!openOnModal && new URLSearchParams(window.location.search).get("modal") === openOnModal,
+  )
+
+  useEffect(() => {
+    if (!openOnModal) return
+    if (new URLSearchParams(window.location.search).get("modal") === openOnModal) {
+      setOpen(true)
+    }
+  }, [openOnModal])
+
   const [name, setName] = useState(initialStage?.name ?? "")
   const [order, setOrder] = useState(String(initialStage?.order ?? 1))
   const [description, setDescription] = useState(initialStage?.description ?? "")
@@ -2682,8 +2712,25 @@ function StageFormDialog({ trigger, title, submitLabel, initialStage, onSubmit }
   )
 }
 
-function DeleteStageDialog({ stage, onConfirm }: { stage: BackofficeStage; onConfirm: () => void }) {
-  const [open, setOpen] = useState(false)
+function DeleteStageDialog({
+  stage,
+  onConfirm,
+  openOnModal,
+}: {
+  stage: BackofficeStage
+  onConfirm: () => void
+  openOnModal?: string
+}) {
+  const [open, setOpen] = useState(
+    () => !!openOnModal && new URLSearchParams(window.location.search).get("modal") === openOnModal,
+  )
+
+  useEffect(() => {
+    if (!openOnModal) return
+    if (new URLSearchParams(window.location.search).get("modal") === openOnModal) {
+      setOpen(true)
+    }
+  }, [openOnModal])
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -2739,6 +2786,7 @@ function EstagiosSection() {
           }
           title="Novo estágio"
           submitLabel="Criar Estágio"
+          openOnModal="novo-estagio"
           onSubmit={(stage) => setStages((prev) => [...prev, stage])}
         />
       </div>
@@ -2768,12 +2816,14 @@ function EstagiosSection() {
                     title="Editar estágio"
                     submitLabel="Salvar alterações"
                     initialStage={stage}
+                    openOnModal={index === 0 ? "editar-estagio" : undefined}
                     onSubmit={(updated) =>
                       setStages((prev) => prev.map((item, i) => (i === index ? updated : item)))
                     }
                   />
                   <DeleteStageDialog
                     stage={stage}
+                    openOnModal={index === 0 ? "excluir-estagio" : undefined}
                     onConfirm={() => setStages((prev) => prev.filter((_, i) => i !== index))}
                   />
                 </div>
@@ -3040,12 +3090,19 @@ export default function App() {
   const searchParams = new URLSearchParams(window.location.search)
   const screenParam = searchParams.get("screen")
   const forcedTab = searchParams.get("tab")
+  const forcedRoleParam = searchParams.get("role")
+  const forcedRole =
+    forcedRoleParam === "mentor" || forcedRoleParam === "mentorado" || forcedRoleParam === "admin"
+      ? forcedRoleParam
+      : null
 
   const storedRole = localStorage.getItem("userRole") as UserRole | null
   const hasValidStoredSession = localStorage.getItem("isAuthenticated") === "true" && storedRole !== null
 
-  const [isAuthenticated, setIsAuthenticated] = useState(() => !!forcedTab || hasValidStoredSession)
-  const [userRole, setUserRole] = useState<UserRole>(() => storedRole ?? "mentorado")
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    () => !!forcedTab || !!forcedRole || hasValidStoredSession,
+  )
+  const [userRole, setUserRole] = useState<UserRole>(() => forcedRole ?? storedRole ?? "mentorado")
   const [authView, setAuthView] = useState<"login" | "sign-up" | "forgot-password">("login")
 
   function loginAsRole(role: UserRole) {
@@ -3087,6 +3144,14 @@ export default function App() {
     return (
       <div className="h-[900px] w-[1440px] overflow-hidden">
         <SignUpPage onSignUp={() => undefined} onGoToLogin={() => undefined} />
+      </div>
+    )
+  }
+
+  if (screenParam === "forgot-password") {
+    return (
+      <div className="h-[900px] w-[1440px] overflow-hidden">
+        <ForgotPasswordPage onGoToLogin={() => undefined} />
       </div>
     )
   }
