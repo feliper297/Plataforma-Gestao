@@ -1,0 +1,15 @@
+/**
+ * Tokens de tipografia.
+ *
+ * A fonte é carregada via `@import url(...)` em `src/index.css` (regra de
+ * CSS que precisa ficar no topo do arquivo raiz). Aqui vive apenas o token
+ * de família de fonte e seu mapeamento para o Tailwind.
+ */
+
+:root {
+  --font-inter: 'Inter', sans-serif;
+}
+
+@theme inline {
+  --font-sans: var(--font-inter);
+}

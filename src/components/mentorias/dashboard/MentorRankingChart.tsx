@@ -49,7 +49,7 @@ export default function MentorRankingChart({ mentores }: { mentores: Mentor[] })
                 color: "var(--popover-foreground)",
               }}
             />
-            <Bar dataKey="totalGeral" name="Sessões" fill="#4CC2CF" radius={[0, 4, 4, 0]}>
+            <Bar dataKey="totalGeral" name="Sessões" fill="var(--chart-1)" radius={[0, 4, 4, 0]}>
               <LabelList dataKey="totalGeral" position="right" style={{ fontSize: 12, fill: "var(--foreground)" }} />
             </Bar>
           </BarChart>

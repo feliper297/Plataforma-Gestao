@@ -1,0 +1,17 @@
+/**
+ * Tokens de espaçamento e raio de borda.
+ *
+ * `--radius` é o valor base; a escala sm/md/lg/xl é derivada dele via
+ * `@theme inline`, seguindo o mesmo padrão de `colors.css`.
+ */
+
+:root {
+  --radius: 0.5rem;
+}
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}

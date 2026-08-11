@@ -35,6 +35,7 @@ import { Sidebar, SidebarNavContent } from "@/components/Sidebar"
 import { UserMenu } from "@/components/UserMenu"
 import FigmaExport, { type FigmaExportScreen } from "@/pages/FigmaExport"
 import RelatorioMentorias from "@/pages/RelatorioMentorias"
+import DesignSystemPage from "@/pages/DesignSystem"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -51,6 +52,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import StatusBadge from "@/components/composites/StatusBadge"
+import type { GoalStatus } from "@/lib/mentorias/mentorias"
 
 // ── KPI Card ─────────────────────────────────────────────────────────────────
 
@@ -318,32 +321,10 @@ const MONTHLY_SESSIONS = [
 const MONTHLY_GOAL = 53
 
 const ADHERENCE_SEGMENTS = [
-  { label: "Atingiu meta", value: 22, color: "#059669" },
+  { label: "Atingiu meta", value: 22, color: "var(--chart-2)" },
   { label: "Não atingiu", value: 18, color: "var(--destructive)" },
-  { label: "Em andamento", value: 10, color: "#9ca3af" },
+  { label: "Em andamento", value: 10, color: "var(--chart-3)" },
 ]
-
-type GoalStatus = "atingiu" | "andamento" | "nao-atingiu"
-
-const STATUS_LABEL: Record<GoalStatus, string> = {
-  atingiu: "Atingiu meta",
-  andamento: "Em andamento",
-  "nao-atingiu": "Não atingiu",
-}
-
-const STATUS_BADGE_CLASS: Record<GoalStatus, string> = {
-  atingiu: "border-emerald-600/20 bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400",
-  andamento: "border-warning/30 bg-warning-muted text-warning-muted-foreground",
-  "nao-atingiu": "border-destructive/30 bg-destructive/5 text-destructive",
-}
-
-function StatusBadge({ status }: { status: GoalStatus }) {
-  return (
-    <Badge variant="outline" className={cn("rounded-full font-medium whitespace-nowrap", STATUS_BADGE_CLASS[status])}>
-      {STATUS_LABEL[status]}
-    </Badge>
-  )
-}
 
 interface MentorPerformanceRow {
   name: string
@@ -358,9 +339,9 @@ interface MentorPerformanceRow {
 }
 
 const MENTOR_PERFORMANCE: MentorPerformanceRow[] = [
-  { name: "Alexandre", mentees: 4, goal: 8, mar: 2, abr: 0, mai: 7, jun: 8, jul: 7, status: "andamento" },
-  { name: "Davi", mentees: 3, goal: 6, mar: 3, abr: 7, mai: 6, jun: 6, jul: 3, status: "nao-atingiu" },
-  { name: "João", mentees: 2, goal: 4, mar: 4, abr: 4, mai: 4, jun: 0, jul: 2, status: "nao-atingiu" },
+  { name: "Alexandre", mentees: 4, goal: 8, mar: 2, abr: 0, mai: 7, jun: 8, jul: 7, status: "em_andamento" },
+  { name: "Davi", mentees: 3, goal: 6, mar: 3, abr: 7, mai: 6, jun: 6, jul: 3, status: "nao_atingiu" },
+  { name: "João", mentees: 2, goal: 4, mar: 4, abr: 4, mai: 4, jun: 0, jul: 2, status: "nao_atingiu" },
   { name: "Marina", mentees: 5, goal: 10, mar: 8, abr: 9, mai: 10, jun: 10, jul: 10, status: "atingiu" },
   { name: "Pedro", mentees: 3, goal: 6, mar: 6, abr: 6, mai: 5, jun: 6, jul: 6, status: "atingiu" },
 ]
@@ -378,10 +359,10 @@ interface MenteeAdherenceRow {
 
 const MENTEE_ADHERENCE: MenteeAdherenceRow[] = [
   { name: "Ryan", goal: 80, abr: 100, mai: 100, jun: 100, jul: 100, average: 100, status: "atingiu" },
-  { name: "Minoro", goal: 80, abr: 50, mai: 50, jun: 0, jul: 0, average: 25, status: "nao-atingiu" },
+  { name: "Minoro", goal: 80, abr: 50, mai: 50, jun: 0, jul: 0, average: 25, status: "nao_atingiu" },
   { name: "Viana", goal: 80, abr: 66.67, mai: 83.33, jun: 100, jul: 100, average: 87.5, status: "atingiu" },
   { name: "Felipe", goal: 80, abr: 80, mai: 90, jun: 70, jul: 85, average: 81.25, status: "atingiu" },
-  { name: "Bruna", goal: 80, abr: 60, mai: 70, jun: 75, jul: 65, average: 67.5, status: "andamento" },
+  { name: "Bruna", goal: 80, abr: 60, mai: 70, jun: 75, jul: 65, average: 67.5, status: "em_andamento" },
 ]
 
 function pct(value: number) {
@@ -1938,6 +1919,12 @@ function NewProjectDialog() {
     () => new URLSearchParams(window.location.search).get("modal") === "novo-projeto",
   )
 
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("modal") === "novo-projeto") {
+      setOpen(true)
+    }
+  }, [])
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -3135,6 +3122,10 @@ export default function App() {
   const [alertsOpen, setAlertsOpen] = useState(false)
   const [showProfile, setShowProfile] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  if (screenParam === "design-system") {
+    return <DesignSystemPage />
+  }
 
   if (screenParam === "login" || screenParam === "dashboard" || screenParam === "user-menu") {
     return <FigmaExport screen={screenParam} />

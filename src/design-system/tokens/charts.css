@@ -1,0 +1,20 @@
+/**
+ * Paleta de cores dedicada a gráficos (Recharts).
+ *
+ * Segue a convenção `--chart-N` (shadcn/ui) para séries de dados sem um
+ * significado semântico próprio no produto. Quando uma cor de gráfico já
+ * representa um conceito semântico existente (ex.: "não atingiu" = erro),
+ * reutiliza o token semântico (`--destructive`) em vez de duplicá-lo aqui.
+ */
+
+:root {
+  --chart-1: #4cc2cf;
+  --chart-2: #059669;
+  --chart-3: #9ca3af;
+}
+
+@theme inline {
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+}

@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { MESES, getGoalAdherenceByMonth } from "@/lib/mentorias/mentorias"
 import type { Mentor } from "@/types/mentoria"
 
-const COLOR_ATINGIU = "#059669"
+const COLOR_ATINGIU = "var(--chart-2)"
 const COLOR_NAO_ATINGIU = "var(--destructive)"
 
 export default function GoalAdherenceChart({ mentores }: { mentores: Mentor[] }) {

@@ -5,19 +5,28 @@ const modal = process.argv[3]
 
 if (!captureId || !modal) {
   console.error("Usage: node figma-capture-modal.mjs <captureId> <modal>")
-  console.error("Modals: novo-estagio | editar-estagio | excluir-estagio")
+  console.error("Modals: novo-projeto | novo-estagio | editar-estagio | excluir-estagio")
   process.exit(1)
 }
 
 const MODAL_ACTIONS = {
+  "novo-projeto": {
+    label: "Backoffice - Novo Projeto",
+    section: "Projetos",
+    open: async (page) => {
+      await page.getByRole("button", { name: "Novo Projeto" }).click()
+    },
+  },
   "novo-estagio": {
     label: "Backoffice - Novo Estágio",
+    section: "Estágios",
     open: async (page) => {
       await page.getByRole("button", { name: "Novo Estágio" }).click()
     },
   },
   "editar-estagio": {
     label: "Backoffice - Editar Estágio",
+    section: "Estágios",
     open: async (page) => {
       const editButtons = page.getByRole("button", { name: "Editar" })
       await editButtons.first().click()
@@ -25,6 +34,7 @@ const MODAL_ACTIONS = {
   },
   "excluir-estagio": {
     label: "Backoffice - Excluir Estágio",
+    section: "Estágios",
     open: async (page) => {
       const deleteButtons = page.getByRole("button", { name: "Excluir" })
       await deleteButtons.first().click()
@@ -39,8 +49,9 @@ if (!action) {
 }
 
 const endpoint = `https://mcp.figma.com/mcp/capture/${captureId}/submit?bindVariables=true`
-const section = encodeURIComponent("Estágios")
-const pageUrl = `http://localhost:8443/?tab=backoffice&section=${section}&modal=${modal}`
+const section = encodeURIComponent(action.section)
+const baseUrl = process.env.FIGMA_CAPTURE_URL ?? "http://127.0.0.1:8443"
+const pageUrl = `${baseUrl}/?tab=backoffice&section=${section}&modal=${modal}`
 
 const browser = await chromium.launch({ headless: true })
 const page = await browser.newPage()

@@ -67,11 +67,11 @@ export default function MonthlyTrendChart({ mentores }: { mentores: Mentor[] }) 
             />
             <Legend wrapperStyle={{ fontSize: 12, color: "var(--muted-foreground)" }} />
             {aba === "barras" ? (
-              <Bar dataKey="sessoes" name="Sessões realizadas" fill="#4CC2CF" radius={[4, 4, 0, 0]}>
+              <Bar dataKey="sessoes" name="Sessões realizadas" fill="var(--chart-1)" radius={[4, 4, 0, 0]}>
                 <LabelList dataKey="sessoes" position="top" style={{ fontSize: 12, fill: "var(--foreground)" }} />
               </Bar>
             ) : (
-              <Line type="monotone" dataKey="sessoes" name="Sessões realizadas" stroke="#4CC2CF" strokeWidth={2} dot connectNulls>
+              <Line type="monotone" dataKey="sessoes" name="Sessões realizadas" stroke="var(--chart-1)" strokeWidth={2} dot connectNulls>
                 <LabelList dataKey="sessoes" position="top" style={{ fontSize: 12, fill: "var(--foreground)" }} />
               </Line>
             )}

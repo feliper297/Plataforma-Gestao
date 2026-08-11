@@ -1,0 +1,8 @@
+/**
+ * Esconde a scrollbar (WebKit) em toda a aplicação.
+ */
+
+::-webkit-scrollbar {
+  width: 0;
+  background: transparent;
+}
