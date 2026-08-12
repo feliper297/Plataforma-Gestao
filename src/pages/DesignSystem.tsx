@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react"
+import { useMemo, useState, type ReactNode } from "react"
 import { Check, Copy } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -78,7 +78,12 @@ const COLOR_GROUPS: { title: string; tokens: Token[] }[] = [
   {
     title: "Feedback",
     tokens: [
-      { name: "destructive", cssVar: "--destructive", light: "oklch(0.577 0.245 27.325)", dark: "oklch(0.704 0.191 22.216)" },
+      {
+        name: "destructive",
+        cssVar: "--destructive",
+        light: "oklch(0.577 0.245 27.325)",
+        dark: "oklch(0.704 0.191 22.216)",
+      },
       {
         name: "destructive-foreground",
         cssVar: "--destructive-foreground",
@@ -118,6 +123,62 @@ const RADIUS_TOKENS: Token[] = [
 
 const STATUS_OPTIONS: GoalStatus[] = ["atingiu", "em_andamento", "nao_atingiu"]
 
+// ── Conversão oklch → hex ────────────────────────────────────────────────────
+// Os tokens de cor são declarados em oklch() (ver colors.css). Para exibir o
+// hexadecimal exigido pela vitrine, convertemos com a matriz padrão OKLab →
+// sRGB (Björn Ottosson), a mesma usada por bibliotecas como culori/color.js.
+
+function clamp01(value: number) {
+  return Math.min(1, Math.max(0, value))
+}
+
+function encodeSrgbChannel(linear: number) {
+  const c = clamp01(linear)
+  return c <= 0.0031308 ? 12.92 * c : 1.055 * c ** (1 / 2.4) - 0.055
+}
+
+function toHexByte(channel: number) {
+  return Math.round(clamp01(channel) * 255)
+    .toString(16)
+    .padStart(2, "0")
+}
+
+const OKLCH_PATTERN = /^oklch\(\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)\s*(?:\/\s*([\d.]+)(%)?)?\s*\)$/i
+
+/** Converte um valor de token (oklch(...) ou #hex) no hex equivalente. Retorna null se não for uma cor. */
+function resolveHex(value: string): string | null {
+  const trimmed = value.trim()
+  if (/^#[0-9a-f]{3,8}$/i.test(trimmed)) return trimmed.toUpperCase()
+
+  const match = trimmed.match(OKLCH_PATTERN)
+  if (!match) return null
+
+  const L = Number(match[1])
+  const C = Number(match[2])
+  const hueDeg = Number(match[3])
+  const alphaRaw = match[4] ? Number(match[4]) : undefined
+  const alpha = alphaRaw === undefined ? 1 : match[5] ? alphaRaw / 100 : alphaRaw
+
+  const hueRad = (hueDeg * Math.PI) / 180
+  const a = C * Math.cos(hueRad)
+  const b = C * Math.sin(hueRad)
+
+  const l_ = L + 0.3963377774 * a + 0.2158037573 * b
+  const m_ = L - 0.1055613458 * a - 0.0638541728 * b
+  const s_ = L - 0.0894841775 * a - 1.2914855480 * b
+
+  const l = l_ ** 3
+  const m = m_ ** 3
+  const s = s_ ** 3
+
+  const rLinear = 4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s
+  const gLinear = -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s
+  const bLinear = -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s
+
+  const hex = `#${toHexByte(encodeSrgbChannel(rLinear))}${toHexByte(encodeSrgbChannel(gLinear))}${toHexByte(encodeSrgbChannel(bLinear))}`.toUpperCase()
+  return alpha < 1 ? `${hex}${toHexByte(alpha).toUpperCase()}` : hex
+}
+
 function useClipboard() {
   const [copied, setCopied] = useState(false)
 
@@ -132,6 +193,29 @@ function useClipboard() {
   }
 
   return { copied, copy }
+}
+
+function CopyableCode({ code, className }: { code: string; className?: string }) {
+  const { copied, copy } = useClipboard()
+
+  return (
+    <button
+      type="button"
+      onClick={() => copy(code)}
+      className={cn(
+        "group flex w-full items-center justify-between gap-2 rounded bg-muted/60 px-2 py-1 text-left transition-colors hover:bg-muted",
+        className,
+      )}
+      aria-label={`Copiar ${code}`}
+    >
+      <span className="truncate font-mono">{code}</span>
+      {copied ? (
+        <Check className="size-3 shrink-0 text-foreground" />
+      ) : (
+        <Copy className="size-3 shrink-0 text-muted-foreground opacity-0 group-hover:opacity-100" />
+      )}
+    </button>
+  )
 }
 
 function CodeBlock({ code, label }: { code: string; label?: string }) {
@@ -168,16 +252,18 @@ function Example({ code, children }: { code: string; children: ReactNode }) {
 
 function TokenSwatch({ token, dark, preview }: { token: Token; dark: boolean; preview: ReactNode }) {
   const value = dark ? token.dark ?? token.light : token.light
+  const hex = useMemo(() => resolveHex(value), [value])
 
   return (
     <div className="space-y-2 rounded-lg border border-border p-3">
       <div className="flex items-center gap-3">
         {preview}
-        <p className="truncate text-sm font-medium text-foreground">{token.name}</p>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-medium text-foreground">{token.name}</p>
+          {hex ? <p className="truncate font-mono text-xs text-muted-foreground">{hex}</p> : null}
+        </div>
       </div>
-      <code className="block truncate rounded bg-muted/60 px-2 py-1 font-mono text-[11px] text-muted-foreground">
-        {token.cssVar}: {value};
-      </code>
+      <CopyableCode code={`${token.cssVar}: ${value};`} className="font-mono text-[11px] text-muted-foreground" />
     </div>
   )
 }
@@ -241,7 +327,10 @@ export default function DesignSystemPage() {
         </header>
 
         <main className="mx-auto max-w-5xl space-y-12 px-6 py-10">
-          <Section title="Cores" description="Tokens semânticos definidos em src/design-system/tokens/colors.css.">
+          <Section
+            title="Cores"
+            description="Tokens semânticos definidos em src/design-system/tokens/colors.css. O hex exibido é calculado a partir do valor oklch() real do token (conversão OKLab → sRGB), não é um valor aproximado à mão."
+          >
             <div className="space-y-6">
               {COLOR_GROUPS.map((group) => (
                 <div key={group.title} className="space-y-3">
@@ -265,14 +354,24 @@ export default function DesignSystemPage() {
           </Section>
 
           <Section title="Tipografia" description="Fonte definida em src/design-system/tokens/typography.css (--font-inter).">
-            <Example code={`--font-inter: 'Inter', sans-serif;\n--font-sans: var(--font-inter); /* mapeado via @theme inline */`}>
-              <div className="space-y-4">
-                <p className="text-3xl font-bold">Aa Bb Cc — Inter Bold</p>
-                <p className="text-xl font-semibold">Aa Bb Cc — Inter Semibold</p>
-                <p className="text-base font-medium">Aa Bb Cc — Inter Medium</p>
-                <p className="text-sm font-normal text-muted-foreground">Aa Bb Cc — Inter Regular (texto secundário)</p>
+            <div className="space-y-3">
+              <div className="rounded-lg border border-border p-4">
+                <div className="space-y-4">
+                  <p className="text-3xl font-bold">Aa Bb Cc — Inter Bold</p>
+                  <p className="text-xl font-semibold">Aa Bb Cc — Inter Semibold</p>
+                  <p className="text-base font-medium">Aa Bb Cc — Inter Medium</p>
+                  <p className="text-sm font-normal text-muted-foreground">Aa Bb Cc — Inter Regular (texto secundário)</p>
+                </div>
               </div>
-            </Example>
+              <CodeBlock
+                label="Token"
+                code={`--font-inter: 'Inter', sans-serif;\n--font-sans: var(--font-inter); /* mapeado via @theme inline */`}
+              />
+              <CodeBlock
+                label="Uso"
+                code={`<p className="text-3xl font-bold">Aa Bb Cc — Inter Bold</p>\n<p className="text-xl font-semibold">Aa Bb Cc — Inter Semibold</p>\n<p className="text-base font-medium">Aa Bb Cc — Inter Medium</p>\n<p className="text-sm font-normal text-muted-foreground">Aa Bb Cc — Inter Regular (texto secundário)</p>`}
+              />
+            </div>
           </Section>
 
           <Section title="Raio de borda" description="Escala derivada de --radius em src/design-system/tokens/spacing.css.">
@@ -344,9 +443,9 @@ export default function DesignSystemPage() {
             </Example>
           </Section>
 
-          <Section title="Formulário" description="Input, Textarea, Select e Switch.">
+          <Section title="Formulário" description="Input, Textarea, Select e Switch, com Label associado via id/htmlFor.">
             <Example
-              code={`<Input placeholder="Digite algo…" />\n\n<Select defaultValue="a">\n  <SelectTrigger><SelectValue /></SelectTrigger>\n  <SelectContent>\n    <SelectItem value="a">Opção A</SelectItem>\n    <SelectItem value="b">Opção B</SelectItem>\n  </SelectContent>\n</Select>\n\n<Textarea placeholder="Escreva algo…" />\n\n<Switch />`}
+              code={`<div className="space-y-2">\n  <Label htmlFor="input">Input</Label>\n  <Input id="input" placeholder="Digite algo…" />\n</div>\n\n<div className="space-y-2">\n  <Label htmlFor="select">Select</Label>\n  <Select defaultValue="a">\n    <SelectTrigger id="select">\n      <SelectValue />\n    </SelectTrigger>\n    <SelectContent>\n      <SelectItem value="a">Opção A</SelectItem>\n      <SelectItem value="b">Opção B</SelectItem>\n    </SelectContent>\n  </Select>\n</div>\n\n<div className="space-y-2">\n  <Label htmlFor="textarea">Textarea</Label>\n  <Textarea id="textarea" placeholder="Escreva algo…" />\n</div>\n\n<div className="flex items-center gap-2">\n  <Switch id="switch" />\n  <Label htmlFor="switch">Switch</Label>\n</div>`}
             >
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
@@ -379,7 +478,7 @@ export default function DesignSystemPage() {
 
           <Section title="Card" description="src/components/ui/card.tsx">
             <Example
-              code={`<Card>\n  <CardHeader>\n    <CardTitle>Título do card</CardTitle>\n    <CardDescription>Descrição de exemplo do componente Card.</CardDescription>\n  </CardHeader>\n  <CardContent>\n    <p>Conteúdo de exemplo.</p>\n  </CardContent>\n</Card>`}
+              code={`<Card className="max-w-sm">\n  <CardHeader>\n    <CardTitle>Título do card</CardTitle>\n    <CardDescription>Descrição de exemplo do componente Card.</CardDescription>\n  </CardHeader>\n  <CardContent>\n    <p className="text-sm text-muted-foreground">Conteúdo de exemplo.</p>\n  </CardContent>\n</Card>`}
             >
               <Card className="max-w-sm">
                 <CardHeader>
@@ -394,7 +493,9 @@ export default function DesignSystemPage() {
           </Section>
 
           <Section title="Avatar" description="src/components/ui/avatar.tsx">
-            <Example code={`<Avatar>\n  <AvatarFallback>FB</AvatarFallback>\n</Avatar>`}>
+            <Example
+              code={`<div className="flex items-center gap-3">\n  <Avatar>\n    <AvatarFallback>FB</AvatarFallback>\n  </Avatar>\n  <Separator orientation="vertical" className="h-8" />\n  <p className="text-sm text-muted-foreground">Avatar + Separator</p>\n</div>`}
+            >
               <div className="flex items-center gap-3">
                 <Avatar>
                   <AvatarFallback>FB</AvatarFallback>
