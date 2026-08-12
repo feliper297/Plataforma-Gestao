@@ -3075,7 +3075,11 @@ function ProfileView({ onBack }: { onBack: () => void }) {
 
 export default function App() {
   const searchParams = new URLSearchParams(window.location.search)
-  const screenParam = searchParams.get("screen")
+  // VITE_DEFAULT_SCREEN permite que um deploy dedicado (ex.: vitrine do Design
+  // System em outro domínio Vercel) abra direto numa tela específica sem
+  // depender de ?screen= na URL. Não afeta o deploy principal, que não define
+  // essa env var.
+  const screenParam = searchParams.get("screen") ?? import.meta.env.VITE_DEFAULT_SCREEN ?? null
   const forcedTab = searchParams.get("tab")
   const forcedRoleParam = searchParams.get("role")
   const forcedRole =
