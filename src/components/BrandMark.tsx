@@ -1,5 +1,5 @@
-import logo from "@/assets/logo.svg"
 import { cn } from "@/lib/utils"
+import { LogoPeopleHub } from "@/components/LogoPeopleHub"
 
 interface BrandMarkProps {
   size?: "sm" | "md"
@@ -10,11 +10,9 @@ interface BrandMarkProps {
 export function BrandMark({ size = "md", showName = true, className }: BrandMarkProps) {
   return (
     <div className={cn("flex items-center", className)}>
-      <img
-        src={logo}
-        alt="PeopleHub"
-        className={cn("w-auto object-contain", size === "sm" ? "h-9" : "h-12", !showName && "hidden")}
-      />
+      {showName && (
+        <LogoPeopleHub height={size === "sm" ? 28 : 36} />
+      )}
       {!showName && (
         <div
           className={cn(

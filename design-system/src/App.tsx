@@ -1,4 +1,4 @@
-import logo from './assets/logo.svg'
+import { LogoPeopleHub } from './LogoPeopleHub'
 import './App.css'
 
 function App() {
@@ -6,7 +6,7 @@ function App() {
     <>
       <section id="center">
         <div style={{ padding: '40px 0 24px' }}>
-          <img src={logo} alt="PeopleHub" style={{ height: 48, width: 'auto' }} />
+          <LogoPeopleHub height={48} />
         </div>
         <div>
           <h1>PeopleHub Design System</h1>
@@ -24,13 +24,13 @@ function App() {
             <li style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
               <span style={{ fontWeight: 500 }}>Logo — fundo claro</span>
               <div style={{ background: '#f8f8f8', borderRadius: 8, padding: '12px 24px', display: 'inline-flex' }}>
-                <img src={logo} alt="PeopleHub" style={{ height: 36 }} />
+                <LogoPeopleHub height={36} />
               </div>
             </li>
             <li style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
               <span style={{ fontWeight: 500 }}>Logo — fundo escuro</span>
               <div style={{ background: '#1a1a2e', borderRadius: 8, padding: '12px 24px', display: 'inline-flex' }}>
-                <img src={logo} alt="PeopleHub" style={{ height: 36 }} />
+                <LogoPeopleHub height={36} />
               </div>
             </li>
           </ul>
