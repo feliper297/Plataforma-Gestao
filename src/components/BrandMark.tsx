@@ -11,7 +11,7 @@ export function BrandMark({ size = "md", showName = true, className }: BrandMark
   return (
     <div className={cn("flex items-center", className)}>
       {showName && (
-        <LogoPeopleHub height={size === "sm" ? 28 : 36} />
+        <LogoPeopleHub height={size === "sm" ? 36 : 48} />
       )}
       {!showName && (
         <div
