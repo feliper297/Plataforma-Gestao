@@ -1010,7 +1010,7 @@ function NavButton({ item, active, onClick }: { item: NavItem; active: boolean; 
       onClick={onClick}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-left text-sm font-medium transition-colors",
+        "flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-left text-sm font-medium transition-colors",
         active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground",
       )}
     >
@@ -1035,7 +1035,7 @@ function NavList({ activeId, onSelect }: { activeId: SectionId; onSelect: (id: S
       />
       {NAV_GROUPS.map((group) => (
         <div key={group.title} className="space-y-1">
-          <p className="px-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground/70">{group.title}</p>
+          <p className="px-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground/70">{group.title}</p>
           {group.items.map((item) => (
             <NavButton key={item.id} item={item} active={activeId === item.id} onClick={() => onSelect(item.id)} />
           ))}
@@ -1113,7 +1113,7 @@ export default function DesignSystemPage() {
               <div className="border-b border-border px-4 py-4">
                 <BrandMark size="sm" />
               </div>
-              <div className="overflow-y-auto p-3">
+              <div className="overflow-y-auto px-2 py-3">
                 <NavList activeId={active} onSelect={goTo} />
               </div>
             </SheetContent>
@@ -1134,7 +1134,7 @@ export default function DesignSystemPage() {
         </header>
 
         <div className="mx-auto flex w-full max-w-[1440px]">
-          <aside className="sticky top-16 hidden h-[calc(100vh-4rem)] w-64 shrink-0 overflow-y-auto border-r border-border p-4 md:block">
+          <aside className="sticky top-16 hidden h-[calc(100vh-4rem)] w-64 shrink-0 overflow-y-auto border-r border-border py-4 pl-2 pr-3 md:block">
             <NavList activeId={active} onSelect={goTo} />
           </aside>
 
