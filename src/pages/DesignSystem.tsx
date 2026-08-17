@@ -32,6 +32,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { BrandMark } from "@/components/BrandMark"
 import StatusBadge from "@/components/composites/StatusBadge"
+import EvolucaoMentoradosTable from "@/components/mentorias/dashboard/EvolucaoMentoradosTable"
+import GoalAdherenceChart from "@/components/mentorias/dashboard/GoalAdherenceChart"
+import MentorRankingChart from "@/components/mentorias/dashboard/MentorRankingChart"
+import MentoriasTable from "@/components/mentorias/dashboard/MentoriasTable"
+import MonthlyTrendChart from "@/components/mentorias/dashboard/MonthlyTrendChart"
+import { getMentores } from "@/lib/mentorias/mentorias"
 import { cn } from "@/lib/utils"
 import type { GoalStatus } from "@/lib/mentorias/mentorias"
 
@@ -232,7 +238,7 @@ const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
     title: "Fundamentos",
     items: [
       { id: "colors", label: "Cores", description: "Tokens semânticos de cor, claro e escuro", icon: Palette },
-      { id: "charts", label: "Gráficos", description: "Paleta dedicada aos gráficos (Recharts)", icon: BarChart3 },
+      { id: "charts", label: "Gráficos", description: "Paleta, gráficos e tabelas do dashboard de mentorias", icon: BarChart3 },
       { id: "typography", label: "Tipografia", description: "Família tipográfica e pesos", icon: TypeIcon },
       { id: "radius", label: "Raio de borda", description: "Escala derivada de --radius", icon: RadiusIcon },
     ],
@@ -463,19 +469,87 @@ function ColorsSection({ dark }: { dark: boolean }) {
 }
 
 function ChartsSection({ dark }: { dark: boolean }) {
+  const mentores = useMemo(() => getMentores(), [])
+
   return (
-    <div>
-      <SectionHeader title="Gráficos" description="Paleta dedicada a Recharts em src/design-system/tokens/charts.css." />
-      <PreviewCodeTabs
-        preview={
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {CHART_TOKENS.map((token) => (
-              <ColorSwatch key={token.cssVar} token={token} dark={dark} />
-            ))}
-          </div>
-        }
-        code={buildTokenBlock(":root", CHART_TOKENS, false)}
+    <div className="space-y-12">
+      <SectionHeader
+        title="Gráficos e tabelas"
+        description="Tokens de cor para Recharts e componentes usados no Relatório de Mentorias (aba Dashboard)."
       />
+
+      <div className="space-y-4">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground/70">Paleta de gráficos</h2>
+        <PreviewCodeTabs
+          preview={
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {CHART_TOKENS.map((token) => (
+                <ColorSwatch key={token.cssVar} token={token} dark={dark} />
+              ))}
+            </div>
+          }
+          code={buildTokenBlock(":root", CHART_TOKENS, false)}
+        />
+      </div>
+
+      <div className="space-y-6">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground/70">Componentes de gráfico</h2>
+
+        <div className="space-y-3">
+          <div className="space-y-1">
+            <h3 className="text-base font-semibold text-foreground">Sessões realizadas por mês</h3>
+            <p className="text-xs font-mono text-muted-foreground">src/components/mentorias/dashboard/MonthlyTrendChart.tsx</p>
+          </div>
+          <PreviewCodeTabs
+            preview={
+              <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_360px] items-stretch">
+                <MonthlyTrendChart mentores={mentores} />
+                <GoalAdherenceChart mentores={mentores} />
+              </div>
+            }
+            code={`import MonthlyTrendChart from "@/components/mentorias/dashboard/MonthlyTrendChart"\nimport GoalAdherenceChart from "@/components/mentorias/dashboard/GoalAdherenceChart"\nimport { getMentores } from "@/lib/mentorias/mentorias"\n\nconst mentores = getMentores()\n\n<div className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_360px] items-stretch">\n  <MonthlyTrendChart mentores={mentores} />\n  <GoalAdherenceChart mentores={mentores} />\n</div>`}
+          />
+        </div>
+
+        <div className="space-y-3">
+          <div className="space-y-1">
+            <h3 className="text-base font-semibold text-foreground">Ranking de mentores</h3>
+            <p className="text-xs font-mono text-muted-foreground">src/components/mentorias/dashboard/MentorRankingChart.tsx</p>
+          </div>
+          <PreviewCodeTabs
+            preview={<MentorRankingChart mentores={mentores} />}
+            code={`import MentorRankingChart from "@/components/mentorias/dashboard/MentorRankingChart"\nimport { getMentores } from "@/lib/mentorias/mentorias"\n\nconst mentores = getMentores()\n\n<MentorRankingChart mentores={mentores} />`}
+          />
+        </div>
+      </div>
+
+      <div className="space-y-6">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground/70">Componentes de tabela</h2>
+
+        <div className="space-y-3">
+          <div className="space-y-1">
+            <h3 className="text-base font-semibold text-foreground">Detalhamento por mentor e mês</h3>
+            <p className="text-xs font-mono text-muted-foreground">src/components/mentorias/dashboard/MentoriasTable.tsx</p>
+            <p className="text-sm text-muted-foreground">Tabela com filtros, badges de status por mês e alternância Tabela / Gráfico.</p>
+          </div>
+          <PreviewCodeTabs
+            preview={<MentoriasTable mentores={mentores} />}
+            code={`import MentoriasTable from "@/components/mentorias/dashboard/MentoriasTable"\nimport { getMentores } from "@/lib/mentorias/mentorias"\n\nconst mentores = getMentores()\n\n<MentoriasTable mentores={mentores} />`}
+          />
+        </div>
+
+        <div className="space-y-3">
+          <div className="space-y-1">
+            <h3 className="text-base font-semibold text-foreground">Evolução dos mentorados</h3>
+            <p className="text-xs font-mono text-muted-foreground">src/components/mentorias/dashboard/EvolucaoMentoradosTable.tsx</p>
+            <p className="text-sm text-muted-foreground">Percentuais de adesão por mentorado, com linha de média geral e alternância Tabela / Gráfico.</p>
+          </div>
+          <PreviewCodeTabs
+            preview={<EvolucaoMentoradosTable />}
+            code={`import EvolucaoMentoradosTable from "@/components/mentorias/dashboard/EvolucaoMentoradosTable"\n\n<EvolucaoMentoradosTable />`}
+          />
+        </div>
+      </div>
     </div>
   )
 }
