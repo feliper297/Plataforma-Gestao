@@ -2,6 +2,7 @@ import { useMemo, useState, type ReactNode } from "react"
 import {
   BadgeCheck,
   BarChart3,
+  BookOpen,
   Check,
   CircleUserRound,
   Code2,
@@ -220,6 +221,7 @@ function resolveHex(value: string): string | null {
 
 type SectionId =
   | "overview"
+  | "how-to-use"
   | "colors"
   | "charts"
   | "typography"
@@ -232,6 +234,77 @@ type SectionId =
   | "avatar"
 
 type NavItem = { id: SectionId; label: string; description: string; icon: LucideIcon }
+
+const HOW_TO_USE_STEPS: { step: string; title: string; description: string; code: string }[] = [
+  {
+    step: "01",
+    title: "Importe os tokens",
+    description:
+      "O entrypoint global é src/index.css. Ele carrega Tailwind v4, a fonte Inter e os tokens modulares em src/design-system/.",
+    code: `@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');\n@import 'tailwindcss';\n\n@import './design-system/tokens/index.css';\n@import './design-system/styles/index.css';`,
+  },
+  {
+    step: "02",
+    title: "Defina o tema",
+    description:
+      "Todos os tokens têm par light/dark. Aplique a classe .dark no ancestral mais alto da árvore (html, body ou wrapper da rota).",
+    code: `<div className={cn(isDark && "dark")}>\n  {/* conteúdo */}\n</div>`,
+  },
+  {
+    step: "03",
+    title: "Monte com componentes",
+    description:
+      "Comece pelos primitives em src/components/ui/. Composites (ex.: StatusBadge) entram quando a combinação se repete entre domínios.",
+    code: `import { Button } from "@/components/ui/button"\nimport { Card, CardHeader, CardTitle } from "@/components/ui/card"\nimport StatusBadge from "@/components/composites/StatusBadge"\n\n<Card>\n  <CardHeader>\n    <CardTitle>Relatório</CardTitle>\n  </CardHeader>\n  <Button>Exportar</Button>\n  <StatusBadge status="atingiu" />\n</Card>`,
+  },
+  {
+    step: "04",
+    title: "Respeite a gramática",
+    description:
+      "Use tokens semânticos (bg-primary, text-muted-foreground), Inter como fonte, roxo como ação primária e --warning para alertas não críticos.",
+    code: `// ✅ Correto\n<Button className="bg-primary text-primary-foreground">Salvar</Button>\n<p className="text-muted-foreground">Texto secundário</p>\n\n// ❌ Evite\n<button style={{ background: "#7F358A" }}>Salvar</button>`,
+  },
+]
+
+const SCOPE_ITEMS: { title: string; description: string }[] = [
+  {
+    title: "Plataforma de Gestão (app interno)",
+    description: "Dashboard de mentorias, backoffice, sidebar, formulários e relatórios com suporte a dark mode.",
+  },
+  {
+    title: "Autenticação",
+    description: "Telas de login e cadastro com BrandMark, Card e inputs do design system.",
+  },
+  {
+    title: "Figma PeopleHub",
+    description:
+      "Componentes da seção Components no arquivo PeopleHub devem espelhar os primitives e composites documentados aqui.",
+  },
+  {
+    title: "Vitrine deste Design System",
+    description: "Esta página é a referência viva — o que aparece aqui é o mesmo código usado em produção.",
+  },
+]
+
+const ARCHITECTURE_ITEMS: { label: string; path: string; role: string }[] = [
+  { label: "Tokens", path: "src/design-system/tokens/", role: "Cores, tipografia, raio e paleta de gráficos" },
+  { label: "Estilos globais", path: "src/design-system/styles/", role: "Reset, body e scrollbar" },
+  { label: "Primitives", path: "src/components/ui/", role: "Button, Input, Badge, Card… (Radix + CVA)" },
+  { label: "Composites", path: "src/components/composites/", role: "Combinações reutilizáveis entre domínios" },
+  { label: "Domínio", path: "src/components/mentorias/", role: "Componentes específicos de negócio" },
+  { label: "Documentação", path: "src/pages/DesignSystem.tsx", role: "Vitrine interativa com Visualizar / Código" },
+]
+
+const GRAMMAR_RULES: { type: "do" | "dont"; text: string }[] = [
+  { type: "do", text: "Use classes Tailwind mapeadas aos tokens (bg-primary, border-border, rounded-md)." },
+  { type: "do", text: "Teste todo componente novo em light e dark antes de mergear." },
+  { type: "do", text: "Consulte o Figma antes de criar um primitive que ainda não existe." },
+  { type: "do", text: "Use --warning para estados intermediários; reserve --destructive para erros graves." },
+  { type: "dont", text: "Não hardcode hex/rgb fora de src/design-system/tokens/." },
+  { type: "dont", text: "Não coloque lógica de negócio em src/components/ui/." },
+  { type: "dont", text: "Não duplique um composite — se a combinação se repete, extraia para composites/." },
+  { type: "dont", text: "Não use azul ou verde como cor de ação primária — a marca é roxo (#7F358A)." },
+]
 
 const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
   {
@@ -407,6 +480,14 @@ function OverviewSection({ onNavigate }: { onNavigate: (id: SectionId) => void }
             Fonte única de tokens e componentes da Plataforma de Gestão. Construído com Tailwind CSS v4 e Radix UI —
             cada componente exibido aqui é exatamente o mesmo usado em produção, não uma reimplementação da vitrine.
           </p>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <Button type="button" onClick={() => onNavigate("buttons")}>
+              Abrir componentes
+            </Button>
+            <Button type="button" variant="outline" onClick={() => onNavigate("how-to-use")}>
+              Como usar
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -436,6 +517,163 @@ function OverviewSection({ onNavigate }: { onNavigate: (id: SectionId) => void }
           </div>
         </div>
       ))}
+    </div>
+  )
+}
+
+function HowToUseSection({ onNavigate }: { onNavigate: (id: SectionId) => void }) {
+  return (
+    <div className="space-y-12">
+      <SectionHeader
+        title="Como usar"
+        description="Fluxo mínimo para começar sem fugir da arquitetura e da gramática visual do PeopleHub."
+      />
+
+      <Card className="border-primary/20 bg-muted/30">
+        <CardContent className="space-y-2 p-5 font-mono text-xs sm:text-sm">
+          <p className="text-primary">&gt; peoplehub-ds --status</p>
+          <p className="text-muted-foreground">$ tokens = src/design-system/tokens/</p>
+          <p className="text-muted-foreground">$ runtime = Tailwind v4 + @theme inline</p>
+          <p className="text-muted-foreground">$ components = ui/ · composites/ · &lt;domínio&gt;/</p>
+          <p className="text-muted-foreground">$ themes = light · dark</p>
+          <p className="text-muted-foreground">$ figma = PeopleHub · Components</p>
+          <p className="text-primary">&gt; ready_</p>
+        </CardContent>
+      </Card>
+
+      <div className="space-y-4">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground/70">Escopo</h2>
+        <p className="max-w-2xl text-sm text-muted-foreground">
+          Todas as telas da Plataforma de Gestão PeopleHub usam este design system. É o que mantém a marca coerente
+          entre quem desenvolve features, quem documenta no Figma e quem consome a vitrine.
+        </p>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {SCOPE_ITEMS.map((item) => (
+            <Card key={item.title}>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">{item.title}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">{item.description}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+
+      <div className="space-y-6">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground/70">Getting started</h2>
+        <div className="space-y-6">
+          {HOW_TO_USE_STEPS.map((item) => (
+            <div key={item.step} className="space-y-3">
+              <div className="flex items-start gap-4">
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary/10 font-mono text-xs font-semibold text-primary">
+                  {item.step}
+                </span>
+                <div className="space-y-1">
+                  <h3 className="text-base font-semibold text-foreground">{item.title}</h3>
+                  <p className="text-sm text-muted-foreground">{item.description}</p>
+                </div>
+              </div>
+              <CodeBlock label="Exemplo" code={item.code} />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground/70">Arquitetura</h2>
+        <p className="text-sm text-muted-foreground">
+          Contratos canônicos ficam em <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">src/design-system/</code>.
+          Componentes seguem a hierarquia ui → composites → domínio.
+        </p>
+        <div className="overflow-hidden rounded-lg border border-border">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border bg-muted/40 text-left">
+                <th className="px-4 py-3 font-medium text-foreground">Camada</th>
+                <th className="hidden px-4 py-3 font-medium text-foreground sm:table-cell">Caminho</th>
+                <th className="px-4 py-3 font-medium text-foreground">Papel</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ARCHITECTURE_ITEMS.map((row) => (
+                <tr key={row.path} className="border-b border-border last:border-0">
+                  <td className="px-4 py-3 font-medium text-foreground">{row.label}</td>
+                  <td className="hidden px-4 py-3 font-mono text-xs text-muted-foreground sm:table-cell">{row.path}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{row.role}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground/70">Gramática visual</h2>
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base text-emerald-600 dark:text-emerald-400">Faça</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {GRAMMAR_RULES.filter((rule) => rule.type === "do").map((rule) => (
+                <p key={rule.text} className="flex gap-2 text-sm text-muted-foreground">
+                  <Check className="mt-0.5 size-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                  {rule.text}
+                </p>
+              ))}
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base text-destructive">Evite</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {GRAMMAR_RULES.filter((rule) => rule.type === "dont").map((rule) => (
+                <p key={rule.text} className="flex gap-2 text-sm text-muted-foreground">
+                  <span className="mt-0.5 shrink-0 font-mono text-destructive">×</span>
+                  {rule.text}
+                </p>
+              ))}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground/70">Ordem de leitura</h2>
+        <Card>
+          <CardContent className="space-y-3 p-5">
+            <p className="text-sm text-muted-foreground">Para desenvolvedores e agentes de IA que consomem este repositório:</p>
+            <ol className="list-inside list-decimal space-y-1 text-sm text-foreground">
+              <li>
+                <code className="font-mono text-xs">src/design-system/README.md</code> — convenções e quando criar o quê
+              </li>
+              <li>
+                <code className="font-mono text-xs">src/design-system/tokens/</code> — fonte da verdade dos valores
+              </li>
+              <li>
+                <code className="font-mono text-xs">src/components/ui/</code> — primitives disponíveis
+              </li>
+              <li>
+                Esta vitrine — exemplos visuais + snippets copiáveis
+              </li>
+              <li>
+                Figma PeopleHub → seção Components — referência visual para designers
+              </li>
+            </ol>
+            <div className="flex flex-wrap gap-3 pt-2">
+              <Button type="button" variant="secondary" size="sm" onClick={() => onNavigate("colors")}>
+                Ver tokens de cor
+              </Button>
+              <Button type="button" variant="secondary" size="sm" onClick={() => onNavigate("buttons")}>
+                Ver componentes
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }
@@ -790,6 +1028,11 @@ function NavList({ activeId, onSelect }: { activeId: SectionId; onSelect: (id: S
         active={activeId === "overview"}
         onClick={() => onSelect("overview")}
       />
+      <NavButton
+        item={{ id: "how-to-use", label: "Como usar", description: "", icon: BookOpen }}
+        active={activeId === "how-to-use"}
+        onClick={() => onSelect("how-to-use")}
+      />
       {NAV_GROUPS.map((group) => (
         <div key={group.title} className="space-y-1">
           <p className="px-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground/70">{group.title}</p>
@@ -806,6 +1049,8 @@ function renderSection(active: SectionId, dark: boolean, onNavigate: (id: Sectio
   switch (active) {
     case "overview":
       return <OverviewSection onNavigate={onNavigate} />
+    case "how-to-use":
+      return <HowToUseSection onNavigate={onNavigate} />
     case "colors":
       return <ColorsSection dark={dark} />
     case "charts":
@@ -841,7 +1086,12 @@ export default function DesignSystemPage() {
     setMobileNavOpen(false)
   }
 
-  const activeLabel = active === "overview" ? "Introdução" : ALL_NAV_ITEMS.find((item) => item.id === active)?.label
+  const activeLabel =
+    active === "overview"
+      ? "Introdução"
+      : active === "how-to-use"
+        ? "Como usar"
+        : ALL_NAV_ITEMS.find((item) => item.id === active)?.label
 
   return (
     <div className={cn(dark && "dark")}>
