@@ -14,6 +14,7 @@ import {
   Menu,
   MousePointerClick,
   Palette,
+  PanelRight,
   Radius as RadiusIcon,
   Tag,
   Type as TypeIcon,
@@ -23,11 +24,19 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
-import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
@@ -232,6 +241,7 @@ type SectionId =
   | "form"
   | "card"
   | "avatar"
+  | "modals"
 
 type NavItem = { id: SectionId; label: string; description: string; icon: LucideIcon }
 
@@ -325,6 +335,7 @@ const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
       { id: "form", label: "Formulário", description: "Input, Select, Textarea e Switch", icon: FormInput },
       { id: "card", label: "Card", description: "Header, título, descrição e conteúdo", icon: CreditCard },
       { id: "avatar", label: "Avatar", description: "Avatar com fallback de iniciais", icon: CircleUserRound },
+      { id: "modals", label: "Modais", description: "Dialog, Sheet e confirmação", icon: PanelRight },
     ],
   },
 ]
@@ -866,13 +877,12 @@ function ButtonsSection() {
               <Button variant="link">Link</Button>
             </div>
             <div className="flex flex-wrap items-center gap-3">
-              <Button size="sm">Small</Button>
-              <Button size="default">Default</Button>
-              <Button size="lg">Large</Button>
+              <Button size="sm">Small (36px)</Button>
+              <Button>Medium (44px)</Button>
             </div>
           </div>
         }
-        code={`<Button>Default</Button>\n<Button variant="secondary">Secondary</Button>\n<Button variant="outline">Outline</Button>\n<Button variant="ghost">Ghost</Button>\n<Button variant="destructive">Destructive</Button>\n<Button variant="link">Link</Button>\n\n<Button size="sm">Small</Button>\n<Button size="default">Default</Button>\n<Button size="lg">Large</Button>`}
+        code={`<Button>Default</Button>\n<Button variant="secondary">Secondary</Button>\n<Button variant="outline">Outline</Button>\n<Button variant="ghost">Ghost</Button>\n<Button variant="destructive">Destructive</Button>\n<Button variant="link">Link</Button>\n\n<Button size="sm">Small</Button>\n<Button>Medium</Button>`}
       />
     </div>
   )
@@ -980,6 +990,115 @@ function CardSection() {
   )
 }
 
+function ModalDocEntry({
+  title,
+  path,
+  description,
+  preview,
+  code,
+}: {
+  title: string
+  path: string
+  description?: string
+  preview: ReactNode
+  code: string
+}) {
+  return (
+    <div className="space-y-3">
+      <div className="space-y-1">
+        <h3 className="text-base font-semibold text-foreground">{title}</h3>
+        <p className="text-xs font-mono text-muted-foreground">{path}</p>
+        {description ? <p className="text-sm text-muted-foreground">{description}</p> : null}
+      </div>
+      <PreviewCodeTabs preview={preview} code={code} />
+    </div>
+  )
+}
+
+function ModalsSection() {
+  return (
+    <div className="space-y-8">
+      <SectionHeader
+        title="Modais"
+        description="Três padrões base — primitives em src/components/ui/ e recipes completas no produto (src/App.tsx) e no Figma."
+      />
+
+      <ModalDocEntry
+        title="Dialog"
+        path="src/components/ui/dialog.tsx | Figma Dialog 8:227"
+        description="Modal centralizada com overlay, header, footer e botão fechar."
+        preview={
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline">Abrir Dialog</Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md p-0">
+              <DialogHeader>
+                <DialogTitle>Título do dialog</DialogTitle>
+              </DialogHeader>
+              <div className="px-6 py-5">
+                <p className="text-sm text-muted-foreground">Conteúdo de exemplo do componente Dialog.</p>
+              </div>
+              <DialogFooter>
+                <Button variant="outline">Cancelar</Button>
+                <Button>Confirmar</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        }
+        code={`import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"\nimport { Button } from "@/components/ui/button"\n\n<Dialog>\n  <DialogTrigger asChild>\n    <Button variant="outline">Abrir Dialog</Button>\n  </DialogTrigger>\n  <DialogContent className="max-w-md p-0">\n    <DialogHeader>\n      <DialogTitle>Título do dialog</DialogTitle>\n    </DialogHeader>\n    <div className="px-6 py-5">\n      <p className="text-sm text-muted-foreground">Conteúdo de exemplo.</p>\n    </div>\n    <DialogFooter>\n      <Button variant="outline">Cancelar</Button>\n      <Button>Confirmar</Button>\n    </DialogFooter>\n  </DialogContent>\n</Dialog>`}
+      />
+
+      <ModalDocEntry
+        title="Sheet"
+        path="src/components/ui/sheet.tsx | Figma Sheet 71:131"
+        description="Painel lateral (barra) — side=left ou side=right."
+        preview={
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="outline">Abrir Sheet</Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="flex w-full max-w-sm flex-col p-0">
+              <SheetHeader>
+                <SheetTitle>Painel lateral</SheetTitle>
+                <SheetDescription>Conteúdo deslizante da direita.</SheetDescription>
+              </SheetHeader>
+              <div className="px-6 py-5">
+                <p className="text-sm text-muted-foreground">Use Sheet para detalhes, filtros ou alertas.</p>
+              </div>
+            </SheetContent>
+          </Sheet>
+        }
+        code={`import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"\n\n<Sheet>\n  <SheetTrigger asChild>\n    <Button variant="outline">Abrir Sheet</Button>\n  </SheetTrigger>\n  <SheetContent side="right" className="p-0">\n    <SheetHeader>\n      <SheetTitle>Painel lateral</SheetTitle>\n    </SheetHeader>\n  </SheetContent>\n</Sheet>`}
+      />
+
+      <ModalDocEntry
+        title="Confirmação"
+        path="src/App.tsx | Figma Dialog/ToggleProjectStatus 70:39, Dialog/DeleteStage 70:49"
+        description="Padrão compacto (max-w-md) para ações destrutivas. Novo projeto, editar usuário, agendar reunião etc. estão no Figma como recipes separadas."
+        preview={
+          <div className="max-w-md overflow-hidden rounded-xl border bg-card text-card-foreground shadow-lg">
+            <div className="border-b px-6 py-5">
+              <p className="text-base font-semibold leading-none tracking-tight">Excluir estágio</p>
+            </div>
+            <div className="px-6 py-5">
+              <p className="text-sm text-muted-foreground">
+                Tem certeza que deseja excluir o estágio{" "}
+                <span className="font-semibold text-foreground">Execução</span>? Essa ação não pode ser desfeita.
+              </p>
+            </div>
+            <div className="flex items-center justify-end gap-2 border-t bg-card px-6 py-4">
+              <Button variant="outline">Cancelar</Button>
+              <Button variant="destructive">Excluir</Button>
+            </div>
+          </div>
+        }
+        code={`<Dialog>\n  <DialogContent className="max-w-md p-0">\n    <DialogHeader>\n      <DialogTitle>Excluir estágio</DialogTitle>\n    </DialogHeader>\n    <div className="px-6 py-5">\n      <p className="text-sm text-muted-foreground">Tem certeza…</p>\n    </div>\n    <DialogFooter>\n      <Button variant="outline">Cancelar</Button>\n      <Button variant="destructive">Excluir</Button>\n    </DialogFooter>\n  </DialogContent>\n</Dialog>`}
+      />
+    </div>
+  )
+}
+
 function AvatarSection() {
   return (
     <div>
@@ -1071,6 +1190,8 @@ function renderSection(active: SectionId, dark: boolean, onNavigate: (id: Sectio
       return <CardSection />
     case "avatar":
       return <AvatarSection />
+    case "modals":
+      return <ModalsSection />
     default:
       return null
   }
@@ -1078,7 +1199,11 @@ function renderSection(active: SectionId, dark: boolean, onNavigate: (id: Sectio
 
 export default function DesignSystemPage() {
   const [dark, setDark] = useState(false)
-  const [active, setActive] = useState<SectionId>("overview")
+  const [active, setActive] = useState<SectionId>(() => {
+    const dsSection = new URLSearchParams(window.location.search).get("dsSection")
+    if (dsSection === "modals") return "modals"
+    return "overview"
+  })
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
 
   function goTo(id: SectionId) {

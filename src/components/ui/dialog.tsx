@@ -54,7 +54,7 @@ const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivEleme
 DialogHeader.displayName = "DialogHeader"
 
 const DialogFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn("flex items-center justify-end gap-2 border-t bg-white px-6 py-4", className)} {...props} />
+  <div className={cn("flex items-center justify-end gap-2 border-t bg-card px-6 py-4", className)} {...props} />
 )
 DialogFooter.displayName = "DialogFooter"
 
